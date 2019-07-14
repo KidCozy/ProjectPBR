@@ -84,8 +84,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -147,19 +147,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConstantGeometry.h" />
+    <ClInclude Include="D3DHelper.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Geometrics.h" />
+    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="ProjectPBR.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Sphere.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="VirtualObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConstantGeometry.cpp" />
+    <ClCompile Include="D3DHelper.cpp" />
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="ProjectPBR.cpp" />
+    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="VirtualObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ProjectPBR.rc" />
