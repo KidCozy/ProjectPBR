@@ -149,11 +149,13 @@
   <ItemGroup>
     <ClInclude Include="ConstantGeometry.h" />
     <ClInclude Include="D3DHelper.h" />
+    <ClInclude Include="DXGIPreset.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Geometrics.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="ProjectPBR.h" />
+    <ClInclude Include="RenderManager.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="stdafx.h" />
@@ -167,6 +169,7 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ProjectPBR.cpp" />
+    <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

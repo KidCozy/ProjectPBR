@@ -1,5 +1,12 @@
+#include<DirectXMath.h>
+#include<DirectXColors.h>
+
 #include "VirtualObject.h"
+#include"RenderManager.h"
 #include"D3DHelper.h"
+
+using namespace DirectX;
+
 class Engine :
 	public VirtualObject
 {
@@ -7,14 +14,17 @@ private:
 	HWND MainWindow;
 	UINT Width;
 	UINT Height;
-
-	ID3D11Device* Device;
-	ID3D11DeviceContext* Context;
+	UINT BufferCount = 1;
 
 	IDXGIFactory* Factory;
 	IDXGISwapChain* SwapChain;
 
-	D3DHelper Helper = D3DHelper(Device, Width, Height);
+	D3DHelper Helper = D3DHelper(Device, Context,SwapChain, Width, Height);
+	RenderManager Renderer;
+private:
+	void GenerateDescriptors();
+
+	void ClearScreen(XMVECTORF32 ClearColor);
 
 protected:
 	virtual void OnInit() override;
