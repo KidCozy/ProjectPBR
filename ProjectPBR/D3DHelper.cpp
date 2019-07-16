@@ -116,10 +116,6 @@ bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, _Out_ ID3D11T
 		}
 	}
 
-
-
-
-
 	return true;
 
 }

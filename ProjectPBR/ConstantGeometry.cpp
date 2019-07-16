@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "ConstantGeometry.h"
 
-
 ConstantGeometry::ConstantGeometry()
 {
+	
 }
 
 

@@ -42,26 +42,28 @@ void Engine::OnInit()
 
 	GenerateDescriptors();
 
-	//Helper.CreateRenderTarget(SwapChain,Renderer.GetRenderTargetArray(), Renderer.GetRenderTargetDesc());
-	//Helper.CreateDepthStencil(Renderer.GetDepthStencil(), Renderer.GetDepthStencilDesc());
 	Helper.CreateRenderTargetView(Renderer.GetRenderTargetView(), Renderer.GetRenderTargetViewDesc());
-	//Helper.CreateDepthStencilView(Renderer.GetDepthStencil(), Renderer.GetDepthStencilView(), nullptr);
+	Helper.CreateDepthStencilView(Renderer.GetDepthStencilView(), Renderer.GetDepthStencilViewDesc());
 
-
-
+	Renderer.Init();
 
 }
 
 void Engine::OnUpdate()
 {
+	Renderer.Update();
 }
 
 void Engine::OnRender()
 {
 	ClearScreen(Colors::Black);
+
+	Renderer.Render();
+
 	SwapChain->Present(0, 0);
 }
 
 void Engine::OnRelease()
 {
+	Renderer.Release();
 }

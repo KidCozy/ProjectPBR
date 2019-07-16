@@ -57,6 +57,9 @@
     <ClInclude Include="DXGIPreset.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -89,6 +92,9 @@
     <ClCompile Include="RenderManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ProjectPBR.rc">
@@ -102,5 +108,10 @@
     <Image Include="ProjectPBR.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DefaultShader.fx">
+      <Filter>소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>

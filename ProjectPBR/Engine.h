@@ -19,7 +19,7 @@ private:
 	IDXGIFactory* Factory;
 	IDXGISwapChain* SwapChain;
 
-	D3DHelper Helper = D3DHelper(Device, Context,SwapChain, Width, Height);
+	D3DHelper Helper = D3DHelper(Device, Context, SwapChain, Width, Height);
 	RenderManager Renderer;
 private:
 	void GenerateDescriptors();

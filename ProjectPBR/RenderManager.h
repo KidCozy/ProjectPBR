@@ -1,8 +1,12 @@
 #pragma once
 #include<d3d11.h>
 #include<dxgi.h>
+#include<vector>
 #include"DXGIPreset.h"
 #include"VirtualObject.h"
+
+#include"Sphere.h"
+
 class RenderManager :
 	public VirtualObject
 {
@@ -20,7 +24,16 @@ private:
 	D3D11_TEXTURE2D_DESC DepthStencilDesc{};
 	D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc{};
 
+	std::vector<D3D11_INPUT_ELEMENT_DESC> DefaultInputLayout;
+
 	D3D11_VIEWPORT MainViewport;
+
+public:
+	Sphere StaticSphere;
+
+private:
+
+	void SetInputElements();
 
 public:
 

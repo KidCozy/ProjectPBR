@@ -4,7 +4,8 @@ class ConstantGeometry :
 	public Geometry
 {
 protected:
-	BaseBuffer* Buffer;
+
+
 	
 public:
 	ConstantGeometry();
