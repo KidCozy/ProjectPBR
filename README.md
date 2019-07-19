@@ -6,7 +6,7 @@ This project is related with 3D graphics api such as DirectX. Researching and de
 To-do
 
  - [ ] Primitive Rendering (No graphical features such as lighting, post processing)
-	 - [ ] Sphere rendering
+	 - [x] Sphere rendering
 	 - [ ] Quad rendering
  - [ ] Basic Rendering
 	 - [ ] Lighting (Based on Phong)
