@@ -196,3 +196,47 @@ bool D3DHelper::CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilVie
 	}
 	return true;
 }
+
+bool D3DHelper::AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer, std::vector<Vertex>* VContainer, std::vector<WORD>* IContainer)
+{
+
+	D3D11_BUFFER_DESC VBuffer{}, IBuffer{}, CBuffer{};
+	D3D11_SUBRESOURCE_DATA VData{}, IData{};
+
+	VBuffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	VBuffer.ByteWidth = sizeof(Vertex) * VContainer->size();
+	VBuffer.Usage = D3D11_USAGE_IMMUTABLE;
+
+	IBuffer.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	IBuffer.ByteWidth = sizeof(WORD) * IContainer->size();
+	IBuffer.Usage = D3D11_USAGE_IMMUTABLE;
+
+	CBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	CBuffer.ByteWidth = sizeof(ConstantBuffer);
+	CBuffer.Usage = D3D11_USAGE_DEFAULT;
+
+	VData.pSysMem = VContainer->data();
+	IData.pSysMem = IContainer->data();
+
+	if (FAILED(Device->CreateBuffer(&VBuffer, &VData, &BaseBuffer->VBuffer))) {
+		MessageBox(NULL, L"Failed to create vertex buffer", 0, 0);
+		return false;
+
+	}
+
+	if (FAILED(Device->CreateBuffer(&IBuffer, &IData, &BaseBuffer->IBuffer))) {
+		MessageBox(NULL, L"Failed to create index buffer", 0, 0);
+
+		return false;
+
+	}
+
+	if (FAILED(Device->CreateBuffer(&CBuffer, NULL, &BaseBuffer->ABuffer))) {
+		MessageBox(NULL, L"Failed to create constant buffer", 0, 0);
+
+		return false;
+
+	}
+
+	return true;
+}

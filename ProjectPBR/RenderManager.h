@@ -4,8 +4,9 @@
 #include<vector>
 #include"DXGIPreset.h"
 #include"VirtualObject.h"
-
+#include"D3DHelper.h"
 #include"Sphere.h"
+#include"Camera.h"
 
 class RenderManager :
 	public VirtualObject
@@ -30,7 +31,7 @@ private:
 
 public:
 	Sphere StaticSphere;
-
+	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
 private:
 
 	void SetInputElements();
@@ -46,6 +47,7 @@ public:
 	D3D11_DEPTH_STENCIL_VIEW_DESC* GetDepthStencilViewDesc() { return &DepthStencilViewDesc; }
 
 	D3D11_VIEWPORT* GetViewport() { return &MainViewport; }
+
 
 	RenderManager() {}
 	RenderManager(_In_ ID3D11Device* InDevice, _In_ ID3D11DeviceContext* InContext, UINT BufferCount);

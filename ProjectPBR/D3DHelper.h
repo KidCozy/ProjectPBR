@@ -8,8 +8,10 @@
 #include<dxgi.h>
 #include<Windows.h>
 #include<sal.h>
+#include<vector>
 
 #include"DXGIPreset.h"
+#include"Geometrics.h"
 
 class ConstantGeometry;
 class D3DHelper
@@ -54,7 +56,7 @@ public:
 	bool CreateRenderTargetView(_Out_ ID3D11RenderTargetView** RenderTargetView, _In_ D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc);
 	bool CreateDepthStencilView(_Out_ ID3D11DepthStencilView** DepthStencilView, _In_ D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc);
 
-	bool AllocConstantBuffer(ID3D11Device& InDevice, ConstantGeometry& Object);
+	static bool AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer, std::vector<Vertex>* VContainer, std::vector<WORD>* IContainer);
 
 	ID3D11Device* GetDevice() { return Device; }
 	ID3D11DeviceContext* GetContext() { return Context; }

@@ -21,6 +21,8 @@ private:
 
 	D3DHelper Helper = D3DHelper(Device, Context, SwapChain, Width, Height);
 	RenderManager Renderer;
+
+
 private:
 	void GenerateDescriptors();
 

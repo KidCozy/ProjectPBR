@@ -28,7 +28,6 @@ void Engine::ClearScreen(XMVECTORF32 ClearColor)
 {
 	for (UINT i = 0; i < BufferCount; i++) {
 		Context->ClearRenderTargetView(Renderer.GetRenderTargetView()[i], ClearColor);
-
 	}
 	return;
 }
@@ -47,11 +46,16 @@ void Engine::OnInit()
 
 	Renderer.Init();
 
+	
+	
+
 }
 
 void Engine::OnUpdate()
 {
 	Renderer.Update();
+
+
 }
 
 void Engine::OnRender()

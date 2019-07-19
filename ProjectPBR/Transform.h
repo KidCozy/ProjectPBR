@@ -2,75 +2,47 @@
 #include<DirectXMath.h>
 using namespace DirectX;
 
-struct Position
+struct MatrixPtr 
 {
-private:
-	XMFLOAT4 Pos;
-public:
-	void operator+(XMVECTOR Vec)
-	{
-		XMFLOAT4 O;
+	float* _11, *_12, *_13, *_14;
+	float* _21, *_22, *_23, *_24;
+	float* _31, *_32, *_33, *_34;
+	float* _41, *_42, *_43, *_44;
 
-		XMStoreFloat4(&O, Vec);
-
-		Pos.x += O.x;
-		Pos.y += O.y;
-		Pos.z += O.z;
-
-		return;
-	}
-
-	void operator+(XMFLOAT4 Vec)
-	{
-		Pos.x += Vec.x;
-		Pos.y += Vec.y;
-		Pos.z += Vec.z;
-
-		return;
-	}
-
+	bool SetMatrixPointer(XMFLOAT4X4* Matrix);
 };
 
-struct Rotation
+struct VectorPtr
 {
-private:
-	XMFLOAT4 Rot;
-public:
-	void operator+(XMVECTOR Vec)
-	{
-		XMFLOAT4 O;
+	float* x, *y, *z, *w;
 
-		XMStoreFloat4(&O, Vec);
-
-		Rot.x += O.x;
-		Rot.y += O.y;
-		Rot.z += O.z;
-
-		return;
-	}
-
-	void operator+(XMFLOAT4 Vec)
-	{
-		Rot.x += Vec.x;
-		Rot.y += Vec.y;
-		Rot.z += Vec.z;
-
-		return;
-	}
-};
-
-struct Scale
-{
-
+	bool SetVectorPointer(float* Element1, float* Element2, float* Element3, float* Element4);
 };
 
 struct Transform
 {
-	XMFLOAT4X4 TRSMatrix;
+private:
+	XMFLOAT4X4 MatrixOrigin;
+	MatrixPtr Matrix;
 
-	XMFLOAT4 Position;
-	XMFLOAT4 Rotation;
-	XMFLOAT4 Scale;
+	VectorPtr Position;
+	VectorPtr Rotation;
+	VectorPtr Scale;
+
+	
+
+public:
+	void Translation(XMVECTOR Offset);
+	void Rotate(XMVECTOR Offset);
+	void SetScale(XMVECTOR NewScale);
+
+	XMFLOAT4X4 GetTransform() const { return MatrixOrigin; }
+	XMFLOAT3 GetPosition() const { return XMFLOAT3(MatrixOrigin._41, MatrixOrigin._42, MatrixOrigin._43); }
+	XMFLOAT3 GetRotation() const { return XMFLOAT3(MatrixOrigin._11, MatrixOrigin._22, MatrixOrigin._33); }
+	XMFLOAT3 GetScale() const;
+
+	Transform();
+	~Transform();
 
 };
 

@@ -39,13 +39,9 @@ bool Material::CompileShader(ID3D11DeviceContext* Context, ID3D11Device* Device,
 
 	VertexBlob->Release();
 	PixelBlob->Release();
+
 	return true;
 }
-
-Material::Material()
-{
-}
-
 
 Material::~Material()
 {

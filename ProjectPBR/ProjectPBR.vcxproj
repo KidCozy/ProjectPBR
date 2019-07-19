@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantGeometry.h" />
     <ClInclude Include="D3DHelper.h" />
     <ClInclude Include="DXGIPreset.h" />
@@ -166,6 +167,7 @@
     <ClInclude Include="VirtualObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConstantGeometry.cpp" />
     <ClCompile Include="D3DHelper.cpp" />
     <None Include="DefaultShader.fx">
