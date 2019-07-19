@@ -17,7 +17,7 @@ To-do
 	 - [ ] Shader effects (Fresnel, Bloom & Emissive)
 	 - [ ] Vertex displacement (Include parallax occlusion mapping)
 
-The owner of the project is a student who belongs to research group 'MasterRenderer'
+The owner of the project is a student who belongs to 3D graphics research group called 'MasterRenderer' 
 link of the group just below.
 
 https://steamcommunity.com/groups/MasterRenderer
