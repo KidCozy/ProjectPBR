@@ -138,7 +138,7 @@ bool D3DHelper::CreateRenderTargetView(ID3D11RenderTargetView ** RenderTargetVie
 	D3D11_TEXTURE2D_DESC RenderTargetDesc{};
 
 	RenderTargetDesc.ArraySize = 1;
-	RenderTargetDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+	RenderTargetDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	RenderTargetDesc.CPUAccessFlags = 0;
 	RenderTargetDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	RenderTargetDesc.Height = Height;
@@ -237,6 +237,66 @@ bool D3DHelper::AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer
 		return false;
 
 	}
+
+	return true;
+}
+
+bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
+{
+	ID3DBlob* ErrBlob;
+
+
+
+	if (FAILED(D3DX11CompileEffectFromFile(Resource->GetPath(), nullptr, nullptr,
+		D3DCOMPILE_ENABLE_STRICTNESS, 0, Device, Resource->GetEffectPointer(), &ErrBlob)))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
+{
+	ID3DBlob* VertexBlob, *PixelBlob, *ErrorBlob;
+	HRESULT hr;
+	D3DX11_PASS_DESC PassDesc;
+
+	D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "VS", "vs_4_0",
+		D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &VertexBlob, &ErrorBlob, &hr);
+
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to compile vertex shader", 0, 0);
+		return false;
+	}
+
+	D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "PS", "ps_4_0",
+		D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &PixelBlob, &ErrorBlob, &hr);
+	
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to compile pixel shader", 0, 0);
+		return false;
+	}
+
+	if (FAILED(GenerateEffect(Device, Resource)))
+	{
+		MessageBox(NULL, L"Failed to generate effect", 0, 0);
+		return false;
+	}
+
+	Resource->
+
+
+	if (FAILED(Device->CreateInputLayout(Resource->GetInputLayoutVector()->data(), Resource->GetInputLayoutVector()->size(),
+		VertexBlob->GetBufferPointer(), VertexBlob->GetBufferSize(), &Resource->GetInputLayout())))
+	{
+		MessageBox(NULL, L"Failed to create input layout", 0, 0);
+	}
+
+	VertexBlob->Release();
+	PixelBlob->Release();
 
 	return true;
 }

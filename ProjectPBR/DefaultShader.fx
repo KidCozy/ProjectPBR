@@ -39,3 +39,12 @@ float4 PS(PSInput Input) : SV_Target
 
     return Color;
 }
+
+technique GeometryTech
+{
+    pass
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS()));
+        SetPixelShader(CompileShader(ps_5_0, PS()));
+    }
+};

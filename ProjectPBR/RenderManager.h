@@ -7,6 +7,13 @@
 #include"D3DHelper.h"
 #include"Sphere.h"
 #include"Camera.h"
+#include"Quad.h"
+
+#define DEFAULT_MATERIALSIZE 2
+
+static const D3D11_INPUT_ELEMENT_DESC VERTEX_DESCRIPTION[]{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 } };
 
 class RenderManager :
 	public VirtualObject
@@ -25,18 +32,29 @@ private:
 	D3D11_TEXTURE2D_DESC DepthStencilDesc{};
 	D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc{};
 
+
+
 	std::vector<D3D11_INPUT_ELEMENT_DESC> DefaultInputLayout;
+	std::vector<D3D11_INPUT_ELEMENT_DESC> ScreenQuadInputLayout;
+
+	std::vector<Material*> MaterialContainer;
 
 	D3D11_VIEWPORT MainViewport;
 
+	ID3DX11EffectTechnique* SelectTech;
+
 public:
 	Sphere StaticSphere;
+	Quad ScreenQuad;
 	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
-private:
 
+private:
 	void SetInputElements();
+	void SetMaterialPath();
 
 public:
+
+	void SetTechnique(ID3DX11EffectTechnique* TargetTech) { if(TargetTech != nullptr) SelectTech = TargetTech; }
 
 	_Out_ ID3D11RenderTargetView** GetRenderTargetView() { return RenderTargetView; }
 	D3D11_TEXTURE2D_DESC* GetRenderTargetDesc() { return &RenderTargetDesc; }
@@ -48,6 +66,7 @@ public:
 
 	D3D11_VIEWPORT* GetViewport() { return &MainViewport; }
 
+	void BindBuffer(ConstantGeometry* Geometry);
 
 	RenderManager() {}
 	RenderManager(_In_ ID3D11Device* InDevice, _In_ ID3D11DeviceContext* InContext, UINT BufferCount);

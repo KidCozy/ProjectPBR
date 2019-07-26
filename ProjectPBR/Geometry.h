@@ -14,7 +14,11 @@ protected:
 
 	BaseBuffer Buffer;
 	Material MaterialResource = Material(&Matrix);
+
+
 public:
+
+	void SetMaterial(Material* NewMaterial) { MaterialResource = *NewMaterial; }
 
 	Material* GetMaterial() { return &MaterialResource; }
 	Transform* GetTransform() { return &Matrix; }

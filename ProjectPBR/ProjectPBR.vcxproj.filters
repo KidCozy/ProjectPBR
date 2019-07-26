@@ -9,9 +9,21 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{4e77f995-e5e6-48fa-bdd8-58fd062a42e2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="리소스 파일">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{f5b38ec8-bd97-4cc5-85d4-19dc4cb36d45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\x86">
+      <UniqueIdentifier>{69bedc88-6812-4b61-94d2-575cd0e83cc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\x64">
+      <UniqueIdentifier>{f52c4dab-0990-41a4-8566-cc805a0825c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +75,15 @@
     <ClInclude Include="Camera.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Quad.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\d3dxGlobal.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\d3dx11effect.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -101,6 +122,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Quad.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ProjectPBR.rc">
@@ -119,5 +143,13 @@
     <None Include="DefaultShader.fx">
       <Filter>소스 파일</Filter>
     </None>
+    <None Include="ScreenQuadShader.fx">
+      <Filter>소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Lib\x64\Effects11d.lib">
+      <Filter>Lib\x64</Filter>
+    </Library>
   </ItemGroup>
 </Project>

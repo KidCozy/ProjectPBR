@@ -3,15 +3,21 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "Effects11d.lib")
 
 #include<d3d11.h>
+#include<D3DX11.h>
 #include<dxgi.h>
+#include<d3dx11effect.h>
+#include<D3Dcompiler.h>
+
 #include<Windows.h>
 #include<sal.h>
 #include<vector>
 
 #include"DXGIPreset.h"
 #include"Geometrics.h"
+#include"Material.h"
 
 class ConstantGeometry;
 class D3DHelper
@@ -33,7 +39,6 @@ private:
 	IDXGISwapChain* SwapChain;
 
 private:
-
 	bool CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewport);
 	bool GetMSAAFeature();
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
@@ -57,9 +62,13 @@ public:
 	bool CreateDepthStencilView(_Out_ ID3D11DepthStencilView** DepthStencilView, _In_ D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc);
 
 	static bool AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer, std::vector<Vertex>* VContainer, std::vector<WORD>* IContainer);
+	static bool GenerateEffect(ID3D11Device* Device, Material* Resource);
+	static bool CompileShader(ID3D11Device* Device, Material* Resource, ID3DX11EffectTechnique* Technique);
+
 
 	ID3D11Device* GetDevice() { return Device; }
 	ID3D11DeviceContext* GetContext() { return Context; }
+
 	D3DHelper() {}
 	D3DHelper(ID3D11Device* NewDevice, ID3D11DeviceContext* NewContext,IDXGISwapChain* NewSwapChain, UINT InWidth, UINT InHeight) : 
 		Device(NewDevice), Context(NewContext), SwapChain(NewSwapChain), Width(InWidth), Height(InHeight){}

@@ -75,8 +75,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Windows Kits\10\Include\10.0.17763.0;C:\Users\pencu\Desktop\Personal\Projects\ProjectPBR\ProjectPBR\Include;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Windows Kits\10\Lib\10.0.17763.0\um\x64;C:\Users\pencu\Desktop\Personal\Projects\ProjectPBR\ProjectPBR\Lib\x64;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -156,8 +156,11 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Geometrics.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Include\d3dx11effect.h" />
+    <ClInclude Include="Include\d3dxGlobal.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="ProjectPBR.h" />
+    <ClInclude Include="Quad.h" />
     <ClInclude Include="RenderManager.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Sphere.h" />
@@ -177,6 +180,7 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ProjectPBR.cpp" />
+    <ClCompile Include="Quad.cpp" />
     <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -194,6 +198,14 @@
   <ItemGroup>
     <Image Include="ProjectPBR.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ScreenQuadShader.fx">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Lib\x64\Effects11d.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
