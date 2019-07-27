@@ -35,7 +35,12 @@ bool Material::CompileShader(ID3D11DeviceContext* Context, ID3D11Device* Device,
 	if(FAILED(GenerateEffect(Device, Path)))
 	{
 		MessageBox(NULL, L"Failed to generate effect", 0, 0);
+		return false;
 	}
+
+	WorldMatrix = Shader->GetVariableByName("World")->AsMatrix();
+	ViewMatrix = Shader->GetVariableByName("View")->AsMatrix();
+	ProjectionMatrix = Shader->GetVariableByName("Projection")->AsMatrix();
 
 
 	if (FAILED(Device->CreateInputLayout(InputLayoutDesc.data(), InputLayoutDesc.size(), 
@@ -62,10 +67,9 @@ bool Material::GenerateEffect(ID3D11Device* Device, LPCWSTR Path)
 		return false;
 	}
 
-
-	//if(FAILED(D3DX11Create(Path, D3DCOMPILE_ENABLE_STRICTNESS, Device, &Shader)))
-	//	return false;
-	
+	WorldMatrix = Shader->GetVariableByName("World")->AsMatrix();
+	ViewMatrix = Shader->GetVariableByName("View")->AsMatrix();
+	ProjectionMatrix = Shader->GetVariableByName("Projection")->AsMatrix();
 	
 	return true;
 }

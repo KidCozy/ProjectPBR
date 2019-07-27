@@ -31,7 +31,7 @@ void RenderManager::SetMaterialPath()
 
 }
 
-void RenderManager::BindBuffer(ConstantGeometry * Geometry)
+void RenderManager::BindBuffer(Geometry * Geometry)
 {
 	static const UINT Stride = sizeof(Vertex);
 	static const UINT Offset = 0;
@@ -40,12 +40,32 @@ void RenderManager::BindBuffer(ConstantGeometry * Geometry)
 	Context->IASetIndexBuffer(Geometry->GetBuffer()->IBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-RenderManager::RenderManager(ID3D11Device * InDevice, ID3D11DeviceContext * InContext, UINT BufferCount)
+void RenderManager::DrawObject(Geometry * Object)
+{
+	Object->GetMaterial()->SetWorldMatrix(XMLoadFloat4x4(&Object->GetTransform()->GetTransform()));
+	Object->GetMaterial()->SetViewMatrix(StaticCamera.GetView());
+	Object->GetMaterial()->SetProjectionMatrix(StaticCamera.GetProjection());
+
+	if (FAILED(StaticSphere.GetMaterial()->GetEffect()->GetTechniqueByName("GeometryTech")->GetPassByIndex(0)->Apply(0, Context)))
+	{
+		MessageBox(NULL, L"Apply failed.", 0, 0);
+
+	}
+
+	BindBuffer(Object);
+
+	Context->DrawIndexed(Object->GetIndexCount(), 0, 0);
+
+
+}
+
+RenderManager::RenderManager(UINT InWidth, UINT InHeight, ID3D11Device * InDevice, ID3D11DeviceContext * InContext, UINT BufferCount)
 {
 	Device = InDevice;
 	Context = InContext;
 
-	
+	Width = InWidth;
+	Height = InHeight;
 
 }
 
@@ -59,7 +79,7 @@ void RenderManager::OnInit()
 
 	SetTechnique(MaterialContainer.data()[0]->GetEffect()->GetTechniqueByName("GeometryTech"));
 
-	StaticSphere.SetProperty(3.0f, 100, 100);
+	StaticSphere.SetProperty(1.0f, 32, 32);
 	StaticSphere.Init();
 
 	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
@@ -69,32 +89,23 @@ void RenderManager::OnInit()
 
 	D3DHelper::AllocConstantBuffer(Device, StaticSphere.GetBuffer(), StaticSphere.GetVertices(), StaticSphere.GetIndices());
 	
-
 	Context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
+
+	World = XMMatrixIdentity();
 
 }
 
 void RenderManager::OnUpdate()
 {
+
+	StaticSphere.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
 	
-
-	StaticSphere.GetMaterial()->GetConstBuffer()->View = XMMatrixTranspose(StaticCamera.GetView());
-	StaticSphere.GetMaterial()->GetConstBuffer()->Projection = XMMatrixTranspose(StaticCamera.GetProjection());
-
-	Context->VSSetShader(*StaticSphere.GetMaterial()->GetVertexShader(), NULL, 0);
-	Context->VSSetConstantBuffers(0, 1, &StaticSphere.GetBuffer()->ABuffer);
-
-	Context->PSSetShader(*StaticSphere.GetMaterial()->GetPixelShader(), NULL, 0);
-
-
-
-	Context->UpdateSubresource(StaticSphere.GetBuffer()->ABuffer, 0, NULL, StaticSphere.GetMaterial()->GetConstBuffer(), 0, 0);
-
 }
 
 void RenderManager::OnRender()
 {
-	Context->DrawIndexed(StaticSphere.GetIndexCount(), 0, 0);
+	DrawObject(&StaticSphere);
 }
 
 void RenderManager::OnRelease()

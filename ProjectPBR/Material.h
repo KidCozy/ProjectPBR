@@ -15,6 +15,10 @@ class Material
 {
 protected:
 
+	ID3DX11EffectMatrixVariable* WorldMatrix;
+	ID3DX11EffectMatrixVariable* ViewMatrix;
+	ID3DX11EffectMatrixVariable* ProjectionMatrix;
+
 	ID3DX11Effect* Shader;
 
 	ID3D11VertexShader* VS;
@@ -24,9 +28,11 @@ protected:
 
 	D3DX11_PASS_DESC Pass;
 	ID3D11InputLayout* InputLayout;
+	ID3DX11EffectTechnique* Technique;
 
-	std::vector<ID3DX11EffectTechnique*> TechVector;
 	std::vector<ID3D11ShaderResourceView*> ShaderResources;
+	std::vector<ID3DX11EffectVectorVariable*> VectorVariables;
+	std::vector<ID3DX11EffectVariable*> Variables;
 	std::vector<D3D11_INPUT_ELEMENT_DESC>* InputLayoutDesc;
 
 	LPCWSTR Path;
@@ -36,8 +42,16 @@ public:
 	bool GenerateEffect(ID3D11Device* Device, LPCWSTR Path);
 	bool AddTexture2DResource(ID3D11Device* Device, ID3D11Texture2D* Resource, D3D11_SHADER_RESOURCE_VIEW_DESC& SRVDesc);
 
-	void SetInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC>& InputLayout) { InputLayoutDesc = &InputLayout; }
 	void SetFile(LPCWSTR NewPath) { Path = NewPath; }
+	void SetInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC>& InputLayout) { InputLayoutDesc = &InputLayout; }
+	
+	void SetWorldMatrix(const XMMATRIX& Mat) { WorldMatrix->SetMatrix((float*)&Mat); }
+	void SetViewMatrix(const XMMATRIX& Mat) { ViewMatrix->SetMatrix((float*)&Mat); }
+	void SetProjectionMatrix(const XMMATRIX& Mat) { ProjectionMatrix->SetMatrix((float*)&Mat); }
+
+	void SetWorldMatrixPointer(ID3DX11EffectMatrixVariable* Matrix) { WorldMatrix = Matrix; }
+	void SetViewMatrixPointer(ID3DX11EffectMatrixVariable* Matrix) { ViewMatrix = Matrix; }
+	void SetProjectionMatrixPointer(ID3DX11EffectMatrixVariable* Matrix) { ProjectionMatrix = Matrix; }
 
 	ConstantBuffer* GetConstBuffer() { return &ConstBuffer; }
 	ID3DX11Effect** GetEffectPointer() { return &Shader; }
@@ -48,7 +62,8 @@ public:
 	ID3D11InputLayout*& GetInputLayout() { return InputLayout; }
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC>* GetInputLayoutVector() { return InputLayoutDesc; }
-	std::vector<ID3DX11EffectTechnique*>* GetTechniqueVector() { return &TechVector; }
+	ID3DX11EffectTechnique** GetTechniquePointer() { return &Technique; }
+	ID3DX11EffectTechnique* GetTechnique() { return Technique; }
 
 	LPCWSTR GetPath() { return Path; }
 

@@ -154,7 +154,6 @@
     <ClInclude Include="D3DHelper.h" />
     <ClInclude Include="DXGIPreset.h" />
     <ClInclude Include="Engine.h" />
-    <ClInclude Include="FXManager.h" />
     <ClInclude Include="Geometrics.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Include\d3dx11effect.h" />
@@ -178,7 +177,6 @@
       <FileType>Document</FileType>
     </None>
     <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="FXManager.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ProjectPBR.cpp" />

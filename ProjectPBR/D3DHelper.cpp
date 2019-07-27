@@ -105,6 +105,83 @@ bool D3DHelper::GetMSAAFeature()
 	return SampleCount == 1 ? 0 : SampleCount;
 }
 
+bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, ID3DBlob* VertexShader, ID3D11InputLayout** InputLayout)
+{
+	ID3D11ShaderReflection* Reflect;
+	D3D11_SHADER_DESC ShaderDesc{};
+	std::vector<D3D11_INPUT_ELEMENT_DESC> InputDesc;
+
+	if (FAILED(D3DReflect(VertexShader->GetBufferPointer(), VertexShader->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&Reflect)))
+		return false;
+
+	if (FAILED(Reflect->GetDesc(&ShaderDesc)))
+		return false;
+
+	for (UINT i = 0; i < ShaderDesc.InputParameters; i++)
+	{
+		static D3D11_SIGNATURE_PARAMETER_DESC ParamDesc;
+		Reflect->GetInputParameterDesc(i, &ParamDesc);
+
+		D3D11_INPUT_ELEMENT_DESC Element{};
+
+		Element.SemanticName = ParamDesc.SemanticName;
+		Element.SemanticIndex = ParamDesc.SemanticIndex;
+		Element.InputSlot = 0;
+		Element.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		Element.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		Element.InstanceDataStepRate = 0;
+
+		if (ParamDesc.Mask == 1)
+		{
+			if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32)
+				Element.Format = DXGI_FORMAT_R32_UINT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+				Element.Format = DXGI_FORMAT_R32_FLOAT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32)
+				Element.Format = DXGI_FORMAT_R32_SINT;
+		}
+		else if (ParamDesc.Mask <= 3)
+		{
+			if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32)
+				Element.Format = DXGI_FORMAT_R32G32_UINT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+				Element.Format = DXGI_FORMAT_R32G32_FLOAT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32)
+				Element.Format = DXGI_FORMAT_R32G32_SINT;
+		}
+		else if (ParamDesc.Mask <= 7)
+		{
+			if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32)
+				Element.Format = DXGI_FORMAT_R32G32B32_UINT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+				Element.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32)
+				Element.Format = DXGI_FORMAT_R32G32B32_SINT;
+		}
+		else if (ParamDesc.Mask <= 15)
+		{
+			if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32)
+				Element.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+				Element.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			else if (ParamDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32)
+				Element.Format = DXGI_FORMAT_R32G32B32A32_SINT;
+		}
+
+		InputDesc.push_back(Element);
+	
+
+	}
+	
+	Reflect->Release();
+
+	if (FAILED(Device->CreateInputLayout(InputDesc.data(), InputDesc.size(),
+		VertexShader->GetBufferPointer(), VertexShader->GetBufferSize(), InputLayout)))
+		return false;
+
+	return true;
+}
+
 bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, _Out_ ID3D11Texture2D ** RenderTarget, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc)
 {
 	for (UINT i = 0; i < BufferCount; i++)
@@ -245,8 +322,6 @@ bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
 {
 	ID3DBlob* ErrBlob;
 
-
-
 	if (FAILED(D3DX11CompileEffectFromFile(Resource->GetPath(), nullptr, nullptr,
 		D3DCOMPILE_ENABLE_STRICTNESS, 0, Device, Resource->GetEffectPointer(), &ErrBlob)))
 	{
@@ -280,20 +355,32 @@ bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 		return false;
 	}
 
+	if (FAILED(Device->CreateVertexShader(VertexBlob->GetBufferPointer(),
+		VertexBlob->GetBufferSize(), nullptr, Resource->GetVertexShader())))
+	{
+		MessageBox(NULL, L"Failed to create vertex shader (binary)", 0, 0);
+		return false;
+	}
+
+	if (FAILED(Device->CreatePixelShader(PixelBlob->GetBufferPointer(),
+		PixelBlob->GetBufferSize(), nullptr, Resource->GetPixelShader())))
+	{
+		MessageBox(NULL, L"Failed to create pixel shader (binary)", 0, 0);
+		return false;
+	}
+
 	if (FAILED(GenerateEffect(Device, Resource)))
 	{
 		MessageBox(NULL, L"Failed to generate effect", 0, 0);
 		return false;
 	}
 
-	Resource->
+	Resource->SetWorldMatrixPointer(Resource->GetEffect()->GetVariableByName("World")->AsMatrix());
+	Resource->SetViewMatrixPointer(Resource->GetEffect()->GetVariableByName("View")->AsMatrix());
+	Resource->SetProjectionMatrixPointer(Resource->GetEffect()->GetVariableByName("Projection")->AsMatrix());
 
 
-	if (FAILED(Device->CreateInputLayout(Resource->GetInputLayoutVector()->data(), Resource->GetInputLayoutVector()->size(),
-		VertexBlob->GetBufferPointer(), VertexBlob->GetBufferSize(), &Resource->GetInputLayout())))
-	{
-		MessageBox(NULL, L"Failed to create input layout", 0, 0);
-	}
+	GenerateInputLayout(Device, VertexBlob, &Resource->GetInputLayout());
 
 	VertexBlob->Release();
 	PixelBlob->Release();

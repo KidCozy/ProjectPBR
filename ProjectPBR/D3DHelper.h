@@ -32,7 +32,6 @@ private:
 
 	DXGI_FORMAT RenderTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	
-
 	ID3D11Device* Device;
 	ID3D11DeviceContext* Context;
 	ID3D11RasterizerState* RasterizerState;
@@ -43,6 +42,7 @@ private:
 	bool GetMSAAFeature();
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
 
+	static bool GenerateInputLayout(ID3D11Device* Device, ID3DBlob* VertexShader, ID3D11InputLayout** InputLayout);
 public:
 	
 	UINT GetSampleCount() const { return SampleCount; }
@@ -63,8 +63,8 @@ public:
 
 	static bool AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer, std::vector<Vertex>* VContainer, std::vector<WORD>* IContainer);
 	static bool GenerateEffect(ID3D11Device* Device, Material* Resource);
-	static bool CompileShader(ID3D11Device* Device, Material* Resource, ID3DX11EffectTechnique* Technique);
-
+	static bool CompileShader(ID3D11Device* Device, Material* Resource);
+	
 
 	ID3D11Device* GetDevice() { return Device; }
 	ID3D11DeviceContext* GetContext() { return Context; }

@@ -48,13 +48,20 @@ public:
 	Quad ScreenQuad;
 	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
 
+	XMMATRIX World;
+
 private:
 	void SetInputElements();
 	void SetMaterialPath();
 
 public:
 
+	void SetWidth(UINT NewWidth) { Width = NewWidth; }
+	void SetHeight(UINT NewHeight) { Height = NewHeight; }
+
+	void BindBuffer(Geometry* Geometry);
 	void SetTechnique(ID3DX11EffectTechnique* TargetTech) { if(TargetTech != nullptr) SelectTech = TargetTech; }
+	void DrawObject(Geometry* Object);
 
 	_Out_ ID3D11RenderTargetView** GetRenderTargetView() { return RenderTargetView; }
 	D3D11_TEXTURE2D_DESC* GetRenderTargetDesc() { return &RenderTargetDesc; }
@@ -66,10 +73,8 @@ public:
 
 	D3D11_VIEWPORT* GetViewport() { return &MainViewport; }
 
-	void BindBuffer(ConstantGeometry* Geometry);
-
 	RenderManager() {}
-	RenderManager(_In_ ID3D11Device* InDevice, _In_ ID3D11DeviceContext* InContext, UINT BufferCount);
+	RenderManager(UINT InWidth, UINT InHeight, _In_ ID3D11Device* InDevice, _In_ ID3D11DeviceContext* InContext, UINT BufferCount);
 	virtual ~RenderManager() {}
 
 	virtual void OnInit() override;

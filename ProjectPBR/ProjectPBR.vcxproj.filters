@@ -84,9 +84,6 @@
     <ClInclude Include="Include\d3dx11effect.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="FXManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -126,9 +123,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Quad.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="FXManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,5 +1,12 @@
 Texture2D RenderTarget;
 
+cbuffer ConstantBuffer : register(b0)
+{
+    float4x4 World;
+    float4x4 View;
+    float4x4 Projection;
+}
+
 struct VSInput
 {
     float3 Position : POSITION;
@@ -10,6 +17,12 @@ struct PSInput
 {
     float4 Position : SV_POSITION;
     float2 UV : TEXCOORD0;
+};
+
+struct PSOutput
+{
+    float4 Position : SV_Target0;
+    float4 Normal : SV_Target1;
 };
 
 PSInput VS(VSInput Input)

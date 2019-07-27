@@ -37,7 +37,7 @@ void Engine::OnInit()
 	Helper.CreateDevice(&Device, &Context);
 	Helper.CreateDXGI(&MainWindow, Factory, Width, Height, &SwapChain, Renderer.GetViewport());
 
-	Renderer = RenderManager(Device, Context, BufferCount);
+	Renderer = RenderManager(Width, Height, Device, Context, BufferCount);
 
 	GenerateDescriptors();
 
