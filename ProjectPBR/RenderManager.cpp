@@ -49,13 +49,20 @@ void RenderManager::DrawObject(Geometry * Object)
 	if (FAILED(StaticSphere.GetMaterial()->GetEffect()->GetTechniqueByName("GeometryTech")->GetPassByIndex(0)->Apply(0, Context)))
 	{
 		MessageBox(NULL, L"Apply failed.", 0, 0);
-
 	}
 
 	BindBuffer(Object);
 
 	Context->DrawIndexed(Object->GetIndexCount(), 0, 0);
 
+
+}
+
+void RenderManager::SetPass(Geometry * Object)
+{
+	ID3DX11EffectPass* Pass = Object->GetMaterial()->GetPass();
+
+	Pass->Apply(0, Context);
 
 }
 
@@ -83,13 +90,14 @@ void RenderManager::OnInit()
 	StaticSphere.Init();
 
 	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
-//	ScreenQuad.SetMaterial(MaterialContainer.data()[1]);
 
+//	ScreenQuad.SetMaterial(MaterialContainer.data()[1]);
 //	ScreenQuad.Init();
 
 	D3DHelper::AllocConstantBuffer(Device, StaticSphere.GetBuffer(), StaticSphere.GetVertices(), StaticSphere.GetIndices());
 	
 	Context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
 	
 
 	World = XMMatrixIdentity();
@@ -98,7 +106,7 @@ void RenderManager::OnInit()
 
 void RenderManager::OnUpdate()
 {
-
+	SetPass(&StaticSphere);
 	StaticSphere.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
 	
 }

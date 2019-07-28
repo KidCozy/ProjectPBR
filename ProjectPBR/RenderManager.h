@@ -62,6 +62,7 @@ public:
 	void BindBuffer(Geometry* Geometry);
 	void SetTechnique(ID3DX11EffectTechnique* TargetTech) { if(TargetTech != nullptr) SelectTech = TargetTech; }
 	void DrawObject(Geometry* Object);
+	void SetPass(Geometry* Object);
 
 	_Out_ ID3D11RenderTargetView** GetRenderTargetView() { return RenderTargetView; }
 	D3D11_TEXTURE2D_DESC* GetRenderTargetDesc() { return &RenderTargetDesc; }

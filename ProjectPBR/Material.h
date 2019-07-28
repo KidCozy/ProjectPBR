@@ -29,10 +29,13 @@ protected:
 	D3DX11_PASS_DESC Pass;
 	ID3D11InputLayout* InputLayout;
 	ID3DX11EffectTechnique* Technique;
+	ID3DX11EffectPass* CurrentPass;
+
 
 	std::vector<ID3D11ShaderResourceView*> ShaderResources;
 	std::vector<ID3DX11EffectVectorVariable*> VectorVariables;
 	std::vector<ID3DX11EffectVariable*> Variables;
+	std::vector<ID3DX11EffectPass*> Passes;
 	std::vector<D3D11_INPUT_ELEMENT_DESC>* InputLayoutDesc;
 
 	LPCWSTR Path;
@@ -53,17 +56,26 @@ public:
 	void SetViewMatrixPointer(ID3DX11EffectMatrixVariable* Matrix) { ViewMatrix = Matrix; }
 	void SetProjectionMatrixPointer(ID3DX11EffectMatrixVariable* Matrix) { ProjectionMatrix = Matrix; }
 
+	HRESULT SetPass(UINT Index) {
+		if (Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index) != nullptr) return E_FAIL; CurrentPass = Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index); return S_OK; }
+
+
+
 	ConstantBuffer* GetConstBuffer() { return &ConstBuffer; }
 	ID3DX11Effect** GetEffectPointer() { return &Shader; }
 	ID3DX11Effect* GetEffect() { return Shader; }
 
-	ID3D11VertexShader** GetVertexShader() { return &VS; }
-	ID3D11PixelShader** GetPixelShader() { return &PS; }
+	ID3D11VertexShader** GetVertexShaderPointer() { return &VS; }
+	ID3D11PixelShader** GetPixelShaderPointer() { return &PS; }
+	ID3D11VertexShader* GetVertexShader() { return VS; }
+	ID3D11PixelShader* GetPixelShader() { return PS; }
 	ID3D11InputLayout*& GetInputLayout() { return InputLayout; }
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC>* GetInputLayoutVector() { return InputLayoutDesc; }
 	ID3DX11EffectTechnique** GetTechniquePointer() { return &Technique; }
 	ID3DX11EffectTechnique* GetTechnique() { return Technique; }
+	ID3DX11EffectPass** GetPassPointer() { return &CurrentPass; }
+	ID3DX11EffectPass* GetPass() { return CurrentPass; }
 
 	LPCWSTR GetPath() { return Path; }
 

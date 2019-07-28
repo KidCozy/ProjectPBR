@@ -42,7 +42,7 @@ private:
 	bool GetMSAAFeature();
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
 
-	static bool GenerateInputLayout(ID3D11Device* Device, ID3DBlob* VertexShader, ID3D11InputLayout** InputLayout);
+	static bool GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* PassDesc, ID3D11InputLayout** InputLayout);
 public:
 	
 	UINT GetSampleCount() const { return SampleCount; }

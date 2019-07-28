@@ -105,13 +105,13 @@ bool D3DHelper::GetMSAAFeature()
 	return SampleCount == 1 ? 0 : SampleCount;
 }
 
-bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, ID3DBlob* VertexShader, ID3D11InputLayout** InputLayout)
+bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* PassDesc, ID3D11InputLayout** InputLayout)
 {
 	ID3D11ShaderReflection* Reflect;
 	D3D11_SHADER_DESC ShaderDesc{};
 	std::vector<D3D11_INPUT_ELEMENT_DESC> InputDesc;
 
-	if (FAILED(D3DReflect(VertexShader->GetBufferPointer(), VertexShader->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&Reflect)))
+	if (FAILED(D3DReflect(PassDesc->pIAInputSignature, PassDesc->IAInputSignatureSize, IID_ID3D11ShaderReflection, (void**)&Reflect)))
 		return false;
 
 	if (FAILED(Reflect->GetDesc(&ShaderDesc)))
@@ -173,11 +173,15 @@ bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, ID3DBlob* VertexShader
 
 	}
 	
+
+
 	Reflect->Release();
 
 	if (FAILED(Device->CreateInputLayout(InputDesc.data(), InputDesc.size(),
-		VertexShader->GetBufferPointer(), VertexShader->GetBufferSize(), InputLayout)))
+		PassDesc->pIAInputSignature,PassDesc->IAInputSignatureSize, InputLayout)))
 		return false;
+
+	
 
 	return true;
 }
@@ -323,7 +327,7 @@ bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
 	ID3DBlob* ErrBlob;
 
 	if (FAILED(D3DX11CompileEffectFromFile(Resource->GetPath(), nullptr, nullptr,
-		D3DCOMPILE_ENABLE_STRICTNESS, 0, Device, Resource->GetEffectPointer(), &ErrBlob)))
+		D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY, 0, Device, Resource->GetEffectPointer(), &ErrBlob)))
 	{
 		return false;
 	}
@@ -335,55 +339,57 @@ bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 {
 	ID3DBlob* VertexBlob, *PixelBlob, *ErrorBlob;
 	HRESULT hr;
-	D3DX11_PASS_DESC PassDesc;
 
-	D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "VS", "vs_4_0",
-		D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &VertexBlob, &ErrorBlob, &hr);
+	//D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "VS", "vs_5_0",
+	//	D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &VertexBlob, &ErrorBlob, &hr);
 
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, L"Failed to compile vertex shader", 0, 0);
-		return false;
-	}
+	//if (FAILED(hr))
+	//{
+	//	MessageBox(NULL, L"Failed to compile vertex shader", 0, 0);
+	//	return false;
+	//}
 
-	D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "PS", "ps_4_0",
-		D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &PixelBlob, &ErrorBlob, &hr);
-	
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, L"Failed to compile pixel shader", 0, 0);
-		return false;
-	}
+	//D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "RTWriter", "ps_5_0",
+	//	D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &PixelBlob, &ErrorBlob, &hr);
+	//
+	//if (FAILED(hr))
+	//{
+	//	MessageBox(NULL, L"Failed to compile pixel shader", 0, 0);
+	//	return false;
+	//}
 
-	if (FAILED(Device->CreateVertexShader(VertexBlob->GetBufferPointer(),
-		VertexBlob->GetBufferSize(), nullptr, Resource->GetVertexShader())))
-	{
-		MessageBox(NULL, L"Failed to create vertex shader (binary)", 0, 0);
-		return false;
-	}
+	//if (FAILED(Device->CreateVertexShader(VertexBlob->GetBufferPointer(),
+	//	VertexBlob->GetBufferSize(), nullptr, Resource->GetVertexShaderPointer())))
+	//{
+	//	MessageBox(NULL, L"Failed to create vertex shader (binary)", 0, 0);
+	//	return false;
+	//}
 
-	if (FAILED(Device->CreatePixelShader(PixelBlob->GetBufferPointer(),
-		PixelBlob->GetBufferSize(), nullptr, Resource->GetPixelShader())))
-	{
-		MessageBox(NULL, L"Failed to create pixel shader (binary)", 0, 0);
-		return false;
-	}
+	//if (FAILED(Device->CreatePixelShader(PixelBlob->GetBufferPointer(),
+	//	PixelBlob->GetBufferSize(), nullptr, Resource->GetPixelShaderPointer())))
+	//{
+	//	MessageBox(NULL, L"Failed to create pixel shader (binary)", 0, 0);
+	//	return false;
+	//}
 
-	if (FAILED(GenerateEffect(Device, Resource)))
+	if (!GenerateEffect(Device, Resource))
 	{
 		MessageBox(NULL, L"Failed to generate effect", 0, 0);
 		return false;
 	}
 
+	D3DX11_PASS_DESC Desc;
+
 	Resource->SetWorldMatrixPointer(Resource->GetEffect()->GetVariableByName("World")->AsMatrix());
 	Resource->SetViewMatrixPointer(Resource->GetEffect()->GetVariableByName("View")->AsMatrix());
 	Resource->SetProjectionMatrixPointer(Resource->GetEffect()->GetVariableByName("Projection")->AsMatrix());
 
+	Resource->GetEffect()->GetTechniqueByName("GemometryTech")->GetPassByIndex(0)->GetDesc(&Desc);
 
-	GenerateInputLayout(Device, VertexBlob, &Resource->GetInputLayout());
+	GenerateInputLayout(Device, &Desc, &Resource->GetInputLayout());
 
-	VertexBlob->Release();
-	PixelBlob->Release();
+	if(FAILED(Resource->SetPass(0)))
+		MessageBox(NULL, L"Failed to set default pass.", 0, 0);
 
 	return true;
 }

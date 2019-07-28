@@ -1,32 +1,39 @@
 SamplerState SampleState : register(s0);
 
+Texture2D PositionBuffer;
+Texture2D NormalBuffer;
+
 cbuffer ConstantBuffer : register(b0)
 {
     float4x4 World;
     float4x4 View;
     float4x4 Projection;
-}
+};
 
 struct VSInput
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
+    float2 UV : TEXCOORD0;
 };
 
 struct RTInput
 {
-    float4 hPos : HPOS;
+    float4 hPos : POSITION;
     float4 Position : SV_POSITION;
     float3 Normal : TEXCOORD0;
-    float2 RenderTarget : TEXCOORD1;
-
-    
+    float2 UV : TEXCOORD1;
 };
 
 struct PSInput
 {
     float4 Position : SV_Target0;
     float4 Normal : SV_Target1;
+};
+
+struct PSFinal
+{
+    float4 Color : SV_Target;
 };
 
 
@@ -48,26 +55,48 @@ RTInput VS(VSInput Input)
 
 PSInput RTWriter(RTInput Input)
 {
-    PSInput Output;
+    PSInput Output = (PSInput)0;
 
     Output.Position = mul(Input.hPos, World);
+    Output.Position = mul(Output.Position, View);
+    Output.Position = mul(Output.Position, Projection);
     Output.Normal = float4(Input.Normal, 1.0f);
 
+    return Output;
 }
 
-
-float4 PS(PSInput Input) : SV_Target
+RTInput DeferredVS(VSInput Input)
 {
-    float4 Color = float4(0.0f, 1.0f, 0.0f, 1.0f);
+    RTInput Output = (RTInput) 0;
 
-    return Color;
+    Output.hPos = float4(Input.Position, 1.0f);
+    Output.Position = Output.hPos;
+    Output.Normal = Input.Normal;
+    Output.UV = Input.UV;
+
+    return Output;
+}
+
+PSFinal DeferredPS(RTInput Input)
+{
+    PSFinal Output = (PSFinal)0;
+    float4 Color = PositionBuffer.Sample(SampleState, Input.UV);
+    Output.Color = Color;
+
+    return Output;
 }
 
 technique11 GeometryTech
 {
-    pass
+    pass P0
     {
         SetVertexShader(CompileShader(vs_5_0, VS()));
-        SetPixelShader(CompileShader(ps_5_0, PS()));
+        SetPixelShader(CompileShader(ps_5_0, RTWriter()));
+    }
+
+    pass P1
+    {
+        SetVertexShader(CompileShader(vs_5_0, DeferredVS()));
+        SetPixelShader(CompileShader(ps_5_0, DeferredPS()));
     }
 };
