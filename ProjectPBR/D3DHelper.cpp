@@ -25,7 +25,6 @@ bool D3DHelper::CreateDXGI(_In_ HWND* hWnd, _Out_ IDXGIFactory* Factory,
 	SwapChainDesc.Flags = 0;
 	SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
 
-	
 	if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&Factory))) {
 		MessageBox(NULL, L"Failed to create dxgi factory", 0, 0);
 		exit(-1);
@@ -79,7 +78,7 @@ bool D3DHelper::CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewp
 
 	D3D11_RASTERIZER_DESC RasterizerDesc = {};
 
-	RasterizerDesc.CullMode = D3D11_CULL_BACK;
+	RasterizerDesc.CullMode = D3D11_CULL_NONE;
 	RasterizerDesc.AntialiasedLineEnable = false;
 	RasterizerDesc.DepthClipEnable = false;
 	RasterizerDesc.FillMode = D3D11_FILL_SOLID;
@@ -186,15 +185,55 @@ bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* Pass
 	return true;
 }
 
-bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, _Out_ ID3D11Texture2D ** RenderTarget, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc)
+void D3DHelper::Resize(RTTexture* GBuffer, GBufferDescription& GBufferDescription)
 {
-	for (UINT i = 0; i < BufferCount; i++)
+	HRESULT hr;
+	ID3D11Texture2D* BackBuffer;
+
+	if (GBuffer->RTV != nullptr || GBuffer->Texture != nullptr)
 	{
-		if (FAILED(SwapChain->GetBuffer(i, __uuidof(ID3D11Texture2D), (void**)&RenderTarget[i])))
+		GBuffer->RTV->Release();
+		GBuffer->Texture->Release();
+	}
+
+	for (UINT i = 0; i < BUFFERCOUNT; i++)
+	{
+
+		if (FAILED(SwapChain->ResizeBuffers(i, Width, Height, SWAPCHAIN_FORMAT, 0)))
+		{
+			MessageBox(NULL, L"Failed to resizing swapchain buffers.", 0, 0);
+		}
+
+		if (FAILED(SwapChain->GetBuffer(i, __uuidof(ID3D11Texture2D), (void**)&GBuffer[i].Texture)))
+		{
+			MessageBox(NULL, L"Failed to resizing", 0, 0);
+		}
+		
+		if (FAILED(Device->CreateRenderTargetView(GBuffer[i].Texture, 0, &GBuffer[i].RTV)))
+		{
+			MessageBox(NULL, L"Failed to create render target view.", 0, 0);
+		}
+
+	}
+
+}
+
+bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, 
+	_Out_ RTTexture* Buffer, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc)
+{
+	for (UINT i = 0; i < BUFFERCOUNT; i++)
+	{
+		if (FAILED(Device->CreateTexture2D(RenderTargetDesc, NULL, &Buffer[i].Texture)))
 		{
 			MessageBox(NULL, L"Failed to create render target texture.", 0, 0);
 			exit(-1);
 		}
+
+		//if (FAILED(SwapChain->GetBuffer(i, __uuidof(ID3D11Texture2D), (void**)&Buffer[i].Texture)))
+		//{
+		//	MessageBox(NULL, L"Failed to create render target texture.", 0, 0);
+		//	exit(-1);
+		//}
 	}
 
 	return true;
@@ -212,9 +251,8 @@ bool D3DHelper::CreateDepthStencil(_Out_ ID3D11Texture2D ** DepthStencil, _In_ D
 	return true;
 }
 
-bool D3DHelper::CreateRenderTargetView(ID3D11RenderTargetView ** RenderTargetView, D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc)
+bool D3DHelper::CreateRenderTargetView(RTTexture* Buffer, D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc)
 {
-	ID3D11Texture2D* RenderTarget[BUFFERCOUNT];
 
 	D3D11_TEXTURE2D_DESC RenderTargetDesc{};
 
@@ -230,23 +268,16 @@ bool D3DHelper::CreateRenderTargetView(ID3D11RenderTargetView ** RenderTargetVie
 	RenderTargetDesc.SampleDesc.Count = SampleCount;
 	RenderTargetDesc.SampleDesc.Quality = SampleQuality;
 
-	CreateRenderTarget(SwapChain, RenderTarget, &RenderTargetDesc);
+	CreateRenderTarget(SwapChain, Buffer, &RenderTargetDesc);
 
-	for (UINT i = 0; i < BufferCount; i++)
+	for (UINT i = 0; i < BUFFERCOUNT; i++)
 	{
-		if (FAILED(Device->CreateRenderTargetView(RenderTarget[i], 0, &RenderTargetView[i])))
+		if (FAILED(Device->CreateRenderTargetView(Buffer[i].Texture, 0, &Buffer[i].RTV)))
 		{
 			MessageBox(NULL, L"Failed to create render target view.", 0, 0);
 			exit(-1);
 		}
 	}
-
-	for (UINT i = 0; i < BufferCount; i++)
-	{
-		RenderTarget[i]->Release();
-	}
-
-	Context->OMSetRenderTargets(BufferCount, RenderTargetView, nullptr);
 
 	return true;
 }
@@ -277,42 +308,41 @@ bool D3DHelper::CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilVie
 	}
 	return true;
 }
-
-bool D3DHelper::AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer, std::vector<Vertex>* VContainer, std::vector<WORD>* IContainer)
+bool D3DHelper::AllocConstantBuffer(ID3D11Device* Device, Geometry* Geometry)
 {
 
 	D3D11_BUFFER_DESC VBuffer{}, IBuffer{}, CBuffer{};
 	D3D11_SUBRESOURCE_DATA VData{}, IData{};
 
 	VBuffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	VBuffer.ByteWidth = sizeof(Vertex) * VContainer->size();
+	VBuffer.ByteWidth = sizeof(Vertex) * Geometry->GetVertices()->size();
 	VBuffer.Usage = D3D11_USAGE_IMMUTABLE;
 
 	IBuffer.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	IBuffer.ByteWidth = sizeof(WORD) * IContainer->size();
+	IBuffer.ByteWidth = sizeof(WORD) * Geometry->GetIndices()->size();
 	IBuffer.Usage = D3D11_USAGE_IMMUTABLE;
 
 	CBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	CBuffer.ByteWidth = sizeof(ConstantBuffer);
 	CBuffer.Usage = D3D11_USAGE_DEFAULT;
 
-	VData.pSysMem = VContainer->data();
-	IData.pSysMem = IContainer->data();
+	VData.pSysMem = Geometry->GetVertices()->data();
+	IData.pSysMem = Geometry->GetIndices()->data();
 
-	if (FAILED(Device->CreateBuffer(&VBuffer, &VData, &BaseBuffer->VBuffer))) {
+	if (FAILED(Device->CreateBuffer(&VBuffer, &VData, &Geometry->GetBuffer()->VBuffer))) {
 		MessageBox(NULL, L"Failed to create vertex buffer", 0, 0);
 		return false;
 
 	}
 
-	if (FAILED(Device->CreateBuffer(&IBuffer, &IData, &BaseBuffer->IBuffer))) {
+	if (FAILED(Device->CreateBuffer(&IBuffer, &IData, &Geometry->GetBuffer()->IBuffer))) {
 		MessageBox(NULL, L"Failed to create index buffer", 0, 0);
 
 		return false;
 
 	}
 
-	if (FAILED(Device->CreateBuffer(&CBuffer, NULL, &BaseBuffer->ABuffer))) {
+	if (FAILED(Device->CreateBuffer(&CBuffer, NULL, &Geometry->GetBuffer()->ABuffer))) {
 		MessageBox(NULL, L"Failed to create constant buffer", 0, 0);
 
 		return false;
@@ -321,56 +351,29 @@ bool D3DHelper::AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer
 
 	return true;
 }
-
 bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
 {
 	ID3DBlob* ErrBlob;
 
+	DWORD ShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+
+#if defined _DEBUG || defined DEBUG
+	ShaderFlags = D3DCOMPILE_DEBUG;
+#endif
+
 	if (FAILED(D3DX11CompileEffectFromFile(Resource->GetPath(), nullptr, nullptr,
-		D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY, 0, Device, Resource->GetEffectPointer(), &ErrBlob)))
+		ShaderFlags, 0, Device, Resource->GetEffectPointer(), &ErrBlob)))
 	{
 		return false;
 	}
 
 	return true;
 }
-
 bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 {
 	ID3DBlob* VertexBlob, *PixelBlob, *ErrorBlob;
 	HRESULT hr;
-
-	//D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "VS", "vs_5_0",
-	//	D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &VertexBlob, &ErrorBlob, &hr);
-
-	//if (FAILED(hr))
-	//{
-	//	MessageBox(NULL, L"Failed to compile vertex shader", 0, 0);
-	//	return false;
-	//}
-
-	//D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "RTWriter", "ps_5_0",
-	//	D3DCOMPILE_ENABLE_STRICTNESS, 0, NULL, &PixelBlob, &ErrorBlob, &hr);
-	//
-	//if (FAILED(hr))
-	//{
-	//	MessageBox(NULL, L"Failed to compile pixel shader", 0, 0);
-	//	return false;
-	//}
-
-	//if (FAILED(Device->CreateVertexShader(VertexBlob->GetBufferPointer(),
-	//	VertexBlob->GetBufferSize(), nullptr, Resource->GetVertexShaderPointer())))
-	//{
-	//	MessageBox(NULL, L"Failed to create vertex shader (binary)", 0, 0);
-	//	return false;
-	//}
-
-	//if (FAILED(Device->CreatePixelShader(PixelBlob->GetBufferPointer(),
-	//	PixelBlob->GetBufferSize(), nullptr, Resource->GetPixelShaderPointer())))
-	//{
-	//	MessageBox(NULL, L"Failed to create pixel shader (binary)", 0, 0);
-	//	return false;
-	//}
+	D3DX11_PASS_DESC Desc;
 
 	if (!GenerateEffect(Device, Resource))
 	{
@@ -378,16 +381,15 @@ bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 		return false;
 	}
 
-	D3DX11_PASS_DESC Desc;
-
+	
 	Resource->SetWorldMatrixPointer(Resource->GetEffect()->GetVariableByName("World")->AsMatrix());
 	Resource->SetViewMatrixPointer(Resource->GetEffect()->GetVariableByName("View")->AsMatrix());
 	Resource->SetProjectionMatrixPointer(Resource->GetEffect()->GetVariableByName("Projection")->AsMatrix());
 
+
 	Resource->GetEffect()->GetTechniqueByName("GemometryTech")->GetPassByIndex(0)->GetDesc(&Desc);
-
 	GenerateInputLayout(Device, &Desc, &Resource->GetInputLayout());
-
+	
 	if(FAILED(Resource->SetPass(0)))
 		MessageBox(NULL, L"Failed to set default pass.", 0, 0);
 

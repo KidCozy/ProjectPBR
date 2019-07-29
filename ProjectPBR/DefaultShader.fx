@@ -57,9 +57,7 @@ PSInput RTWriter(RTInput Input)
 {
     PSInput Output = (PSInput)0;
 
-    Output.Position = mul(Input.hPos, World);
-    Output.Position = mul(Output.Position, View);
-    Output.Position = mul(Output.Position, Projection);
+    Output.Position = Input.hPos;
     Output.Normal = float4(Input.Normal, 1.0f);
 
     return Output;
@@ -77,11 +75,13 @@ RTInput DeferredVS(VSInput Input)
     return Output;
 }
 
-PSFinal DeferredPS(RTInput Input)
+PSFinal DeferredPS(RTInput Input) : SV_Target
 {
     PSFinal Output = (PSFinal)0;
-    float4 Color = PositionBuffer.Sample(SampleState, Input.UV);
-    Output.Color = Color;
+    float4 Color; //= PositionBuffer.Sample(SampleState, Input.UV);
+ //   Output.Color = Color;
+
+    Output.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
     return Output;
 }

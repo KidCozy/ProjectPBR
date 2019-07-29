@@ -57,9 +57,7 @@ public:
 	void SetProjectionMatrixPointer(ID3DX11EffectMatrixVariable* Matrix) { ProjectionMatrix = Matrix; }
 
 	HRESULT SetPass(UINT Index) {
-		if (Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index) != nullptr) return E_FAIL; CurrentPass = Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index); return S_OK; }
-
-
+		if (Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index) == nullptr) return E_FAIL; CurrentPass = Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index); return S_OK; }
 
 	ConstantBuffer* GetConstBuffer() { return &ConstBuffer; }
 	ID3DX11Effect** GetEffectPointer() { return &Shader; }
@@ -75,7 +73,10 @@ public:
 	ID3DX11EffectTechnique** GetTechniquePointer() { return &Technique; }
 	ID3DX11EffectTechnique* GetTechnique() { return Technique; }
 	ID3DX11EffectPass** GetPassPointer() { return &CurrentPass; }
-	ID3DX11EffectPass* GetPass() { return CurrentPass; }
+	ID3DX11EffectPass* GetPass(UINT Index) { if (Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index) != nullptr) return Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index); return nullptr; }
+
+	void SetShaderResourceView(ID3DX11EffectShaderResourceVariable* Object, ID3D11ShaderResourceView* InSRV) { if(InSRV!=nullptr) Object->SetResource(InSRV); }
+
 
 	LPCWSTR GetPath() { return Path; }
 

@@ -9,10 +9,15 @@ protected:
 	ID3D11DeviceContext* Context;
 
 protected:
+	
+	virtual void PostInitialize() {}
+
 	virtual void OnInit() = 0;
 	virtual void OnUpdate() = 0;
 	virtual void OnRender() = 0;
 	virtual void OnRelease() = 0;
+
+
 
 public:
 

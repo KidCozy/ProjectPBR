@@ -23,16 +23,12 @@ private:
 	UINT Width;
 	UINT Height;
 
-	ID3D11RenderTargetView** RenderTargetView = new ID3D11RenderTargetView*[BUFFERCOUNT];
-	D3D11_TEXTURE2D_DESC RenderTargetDesc{};
-	D3D11_RENDER_TARGET_VIEW_DESC RenderTargetViewDesc{};
-
+	RTTexture GBuffer[BUFFERCOUNT];
+	GBufferDescription GBufferDesc;
+	D3D11_TEXTURE2D_DESC RenderTargetDesc;
 
 	ID3D11DepthStencilView* DepthStencilView;
 	D3D11_TEXTURE2D_DESC DepthStencilDesc{};
-	D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc{};
-
-
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC> DefaultInputLayout;
 	std::vector<D3D11_INPUT_ELEMENT_DESC> ScreenQuadInputLayout;
@@ -54,6 +50,15 @@ private:
 	void SetInputElements();
 	void SetMaterialPath();
 
+protected:
+
+	virtual void PostInitialize() override;
+
+	virtual void OnInit() override;
+	virtual void OnUpdate() override;
+	virtual void OnRender() override;
+	virtual void OnRelease() override;
+
 public:
 
 	void SetWidth(UINT NewWidth) { Width = NewWidth; }
@@ -62,15 +67,18 @@ public:
 	void BindBuffer(Geometry* Geometry);
 	void SetTechnique(ID3DX11EffectTechnique* TargetTech) { if(TargetTech != nullptr) SelectTech = TargetTech; }
 	void DrawObject(Geometry* Object);
-	void SetPass(Geometry* Object);
+	void SetPass(Geometry& Object, UINT Index);
 
-	_Out_ ID3D11RenderTargetView** GetRenderTargetView() { return RenderTargetView; }
-	D3D11_TEXTURE2D_DESC* GetRenderTargetDesc() { return &RenderTargetDesc; }
-	D3D11_RENDER_TARGET_VIEW_DESC* GetRenderTargetViewDesc() { return &RenderTargetViewDesc; }
+	RTTexture* GetGBufferPointer() { return GBuffer; }
+	GBufferDescription* GetGBufferDescriptor() { return &GBufferDesc; }
+
+	_Out_ ID3D11RenderTargetView** GetRenderTargetViewPointer() { return &GBuffer[0].RTV; }
+	D3D11_TEXTURE2D_DESC* GetRenderTargetDesc() { return &GBufferDesc.RenderTargetDesc; }
+	D3D11_RENDER_TARGET_VIEW_DESC* GetRenderTargetViewDesc() { return &GBufferDesc.RTVDesc; }
 
 	_Out_ ID3D11DepthStencilView** GetDepthStencilView() { return &DepthStencilView; }
-	D3D11_TEXTURE2D_DESC* GetDepthStencilDesc() { return &DepthStencilDesc; }
-	D3D11_DEPTH_STENCIL_VIEW_DESC* GetDepthStencilViewDesc() { return &DepthStencilViewDesc; }
+	D3D11_TEXTURE2D_DESC* GetDepthStencilDesc() { return &GBufferDesc.DepthStencilDesc; }
+	D3D11_DEPTH_STENCIL_VIEW_DESC* GetDepthStencilViewDesc() { return &GBufferDesc.DSVDesc; }
 
 	D3D11_VIEWPORT* GetViewport() { return &MainViewport; }
 
@@ -78,9 +86,5 @@ public:
 	RenderManager(UINT InWidth, UINT InHeight, _In_ ID3D11Device* InDevice, _In_ ID3D11DeviceContext* InContext, UINT BufferCount);
 	virtual ~RenderManager() {}
 
-	virtual void OnInit() override;
-	virtual void OnUpdate() override;
-	virtual void OnRender() override;
-	virtual void OnRelease() override;
 };
 

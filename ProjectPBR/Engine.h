@@ -29,6 +29,9 @@ private:
 	void ClearScreen(XMVECTORF32 ClearColor);
 
 protected:
+
+	virtual void PostInitialize() override;
+
 	virtual void OnInit() override;
 	virtual void OnUpdate() override;
 	virtual void OnRender() override;

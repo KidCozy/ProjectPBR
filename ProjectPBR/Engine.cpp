@@ -27,27 +27,32 @@ void Engine::GenerateDescriptors()
 void Engine::ClearScreen(XMVECTORF32 ClearColor)
 {
 	for (UINT i = 0; i < BufferCount; i++) {
-		Context->ClearRenderTargetView(Renderer.GetRenderTargetView()[i], ClearColor);
+		Context->ClearRenderTargetView(Renderer.GetRenderTargetViewPointer()[i], ClearColor);
 	}
 	return;
 }
 
-void Engine::OnInit()
+void Engine::PostInitialize()
 {
+
+
 	Helper.CreateDevice(&Device, &Context);
 	Helper.CreateDXGI(&MainWindow, Factory, Width, Height, &SwapChain, Renderer.GetViewport());
-
 	Renderer = RenderManager(Width, Height, Device, Context, BufferCount);
 
 	GenerateDescriptors();
 
-	Helper.CreateRenderTargetView(Renderer.GetRenderTargetView(), Renderer.GetRenderTargetViewDesc());
+	Helper.CreateRenderTargetView(Renderer.GetGBufferPointer(), Renderer.GetRenderTargetViewDesc());
 	Helper.CreateDepthStencilView(Renderer.GetDepthStencilView(), Renderer.GetDepthStencilViewDesc());
 
-	Renderer.Init();
+	Helper.Resize(Renderer.GetGBufferPointer(), *Renderer.GetGBufferDescriptor());
 
-	
-	
+}
+
+void Engine::OnInit()
+{
+
+	Renderer.Init();
 
 }
 

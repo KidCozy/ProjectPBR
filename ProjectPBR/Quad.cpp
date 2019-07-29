@@ -13,9 +13,9 @@ Quad::~Quad()
 
 void Quad::OnInit()
 {
-	Vertex v1{ {0.0f, 0.0f, 0.0f}};
-	Vertex v2{ {0.0f, 1.0f, 0.0f}};
-	Vertex v3{ {1.0f, 0.0f, 0.0f}};
+	Vertex v1{ {-1.0f, -1.0f, 0.0f}};
+	Vertex v2{ {1.0f, -1.0f, 0.0f}};
+	Vertex v3{ {-1.0f, 1.0f, 0.0f}};
 	Vertex v4{ {1.0f, 1.0f, 0.0f}};
 
 	WORD i[6] = { 0,1,2,
@@ -33,8 +33,8 @@ void Quad::OnInit()
 	Indices.push_back(i[4]);
 	Indices.push_back(i[5]);
 
-	Texture = MaterialResource.GetEffect()->GetVariableByName("RenderTarget");
-
+	Texture[0] = MaterialResource.GetEffect()->GetVariableByName("PositionBuffer")->AsShaderResource();
+	Texture[1] = MaterialResource.GetEffect()->GetVariableByName("NormalBuffer")->AsShaderResource();
 }
 
 void Quad::OnUpdate()

@@ -17,6 +17,7 @@
 
 #include"DXGIPreset.h"
 #include"Geometrics.h"
+#include"Geometry.h"
 #include"Material.h"
 
 class ConstantGeometry;
@@ -38,6 +39,7 @@ private:
 	IDXGISwapChain* SwapChain;
 
 private:
+
 	bool CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewport);
 	bool GetMSAAFeature();
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
@@ -45,6 +47,8 @@ private:
 	static bool GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* PassDesc, ID3D11InputLayout** InputLayout);
 public:
 	
+	void Resize(RTTexture* GBuffer, GBufferDescription& GBufferDescription);
+
 	UINT GetSampleCount() const { return SampleCount; }
 	UINT GetBufferCount() const { return BufferCount; }
 
@@ -55,13 +59,13 @@ public:
 
 	bool CreateDevice(_In_ ID3D11Device** OutDevice, _In_ ID3D11DeviceContext** OutContext);
 
-	bool CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, _Out_ ID3D11Texture2D** RenderTarget, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc);
+	bool CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, _Out_ RTTexture* RenderTarget, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc);
 	bool CreateDepthStencil(_Out_ ID3D11Texture2D** DepthStencil, _In_ D3D11_TEXTURE2D_DESC* DepthStencilDesc);
 
-	bool CreateRenderTargetView(_Out_ ID3D11RenderTargetView** RenderTargetView, _In_ D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc);
+	bool CreateRenderTargetView(RTTexture* Buffer, _In_ D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc);
 	bool CreateDepthStencilView(_Out_ ID3D11DepthStencilView** DepthStencilView, _In_ D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc);
 
-	static bool AllocConstantBuffer(ID3D11Device* Device, BaseBuffer* BaseBuffer, std::vector<Vertex>* VContainer, std::vector<WORD>* IContainer);
+	static bool AllocConstantBuffer(ID3D11Device* Device, Geometry* Geometry);
 	static bool GenerateEffect(ID3D11Device* Device, Material* Resource);
 	static bool CompileShader(ID3D11Device* Device, Material* Resource);
 	

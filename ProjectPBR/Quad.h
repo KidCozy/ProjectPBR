@@ -1,12 +1,12 @@
 #pragma once
 #include "ConstantGeometry.h"
 #include "VirtualObject.h"
+#include"DXGIPreset.h"
 class Quad :
 	public ConstantGeometry, public VirtualObject
 {
 private:
-	ID3DX11EffectVariable* Texture;
-
+	ID3DX11EffectShaderResourceVariable* Texture[2];
 public:
 	Quad();
 	virtual ~Quad();

@@ -1,19 +1,5 @@
 #include "RenderManager.h"
 
-void RenderManager::SetInputElements()
-{
-
-	DefaultInputLayout.push_back(
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
-	DefaultInputLayout.push_back(
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-
-	ScreenQuadInputLayout.push_back(
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0} );
-	ScreenQuadInputLayout.push_back(
-		{ "TEXCOORD", 0, DXGI_FORMAT_R8G8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-}
-
 void RenderManager::SetMaterialPath()
 {
 	Material* ArrayContainer[DEFAULT_MATERIALSIZE];
@@ -46,10 +32,10 @@ void RenderManager::DrawObject(Geometry * Object)
 	Object->GetMaterial()->SetViewMatrix(StaticCamera.GetView());
 	Object->GetMaterial()->SetProjectionMatrix(StaticCamera.GetProjection());
 
-	if (FAILED(StaticSphere.GetMaterial()->GetEffect()->GetTechniqueByName("GeometryTech")->GetPassByIndex(0)->Apply(0, Context)))
-	{
-		MessageBox(NULL, L"Apply failed.", 0, 0);
-	}
+	//if (FAILED(StaticSphere.GetMaterial()->GetEffect()->GetTechniqueByName("GeometryTech")->GetPassByIndex(0)->Apply(0, Context)))
+	//{
+	//	MessageBox(NULL, L"Apply failed.", 0, 0);
+	//}
 
 	BindBuffer(Object);
 
@@ -58,11 +44,14 @@ void RenderManager::DrawObject(Geometry * Object)
 
 }
 
-void RenderManager::SetPass(Geometry * Object)
+void RenderManager::SetPass(Geometry& Object, UINT Index)
 {
-	ID3DX11EffectPass* Pass = Object->GetMaterial()->GetPass();
+	ID3DX11EffectPass* Pass = Object.GetMaterial()->GetPass(Index);
 
-	Pass->Apply(0, Context);
+	if (FAILED(Pass->Apply(0, Context)))
+	{
+		MessageBox(NULL, L"Apply Failed.", 0, 0);
+	}
 
 }
 
@@ -76,47 +65,52 @@ RenderManager::RenderManager(UINT InWidth, UINT InHeight, ID3D11Device * InDevic
 
 }
 
-void RenderManager::OnInit()
+void RenderManager::PostInitialize()
 {
-	SetInputElements();
 	SetMaterialPath();
-
 	D3DHelper::CompileShader(Device, MaterialContainer.data()[0]);
 	D3DHelper::CompileShader(Device, MaterialContainer.data()[1]);
 
+	Context->OMSetRenderTargets(BUFFERCOUNT, &GBuffer[0].RTV, DepthStencilView);
+}
+
+void RenderManager::OnInit()
+{
 	SetTechnique(MaterialContainer.data()[0]->GetEffect()->GetTechniqueByName("GeometryTech"));
 
-	StaticSphere.SetProperty(1.0f, 32, 32);
+	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
+	StaticSphere.SetProperty(1.0f, 64, 64);
 	StaticSphere.Init();
 
-	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
+	ScreenQuad.SetMaterial(MaterialContainer.data()[0]);
+	ScreenQuad.Init();
 
-//	ScreenQuad.SetMaterial(MaterialContainer.data()[1]);
-//	ScreenQuad.Init();
+	D3DHelper::AllocConstantBuffer(Device, &StaticSphere);
+	D3DHelper::AllocConstantBuffer(Device, &ScreenQuad);
 
-	D3DHelper::AllocConstantBuffer(Device, StaticSphere.GetBuffer(), StaticSphere.GetVertices(), StaticSphere.GetIndices());
-	
 	Context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	
-	
-
 	World = XMMatrixIdentity();
 
 }
 
 void RenderManager::OnUpdate()
 {
-	SetPass(&StaticSphere);
+	SetPass(StaticSphere, 0);
 	StaticSphere.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
-	
 }
 
 void RenderManager::OnRender()
 {
 	DrawObject(&StaticSphere);
+
+	SetPass(ScreenQuad, 1);
+	ScreenQuad.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
+	DrawObject(&ScreenQuad);
 }
 
 void RenderManager::OnRelease()
 {
 	StaticSphere.Release();
+	ScreenQuad.Release();
 }

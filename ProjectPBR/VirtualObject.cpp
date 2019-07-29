@@ -4,6 +4,7 @@
 
 void VirtualObject::Init()
 {
+	PostInitialize();
 	OnInit();
 }
 
