@@ -85,6 +85,11 @@ bool Material::AddTexture2DResource(ID3D11Device* Device, ID3D11Texture2D* Resou
 	return true;
 }
 
+void Material::AddTextureResource(ID3D11ShaderResourceView * Texture)
+{
+	ShaderResources.push_back(Texture);
+}
+
 Material::~Material()
 {
 }

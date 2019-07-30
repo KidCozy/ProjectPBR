@@ -6,14 +6,25 @@ class Quad :
 	public ConstantGeometry, public VirtualObject
 {
 private:
-	ID3DX11EffectShaderResourceVariable* Texture[2];
-public:
-	Quad();
-	virtual ~Quad();
+
+	ID3DX11EffectShaderResourceVariable* Position;
+	ID3DX11EffectShaderResourceVariable* Normal;
+
+protected:
 
 	virtual void OnInit() override;
 	virtual void OnUpdate() override;
 	virtual void OnRender() override;
 	virtual void OnRelease() override;
+
+public:
+
+	void SetPosition(ID3D11ShaderResourceView* InPosition) { Position->SetResource(InPosition); }
+	void SetNormal(ID3D11ShaderResourceView* InNormal) { Normal->SetResource(InNormal); }
+
+	Quad();
+	virtual ~Quad();
+
+
 };
 

@@ -33,7 +33,7 @@ struct PSInput
 
 struct PSFinal
 {
-    float4 Color : SV_Target;
+    float4 Color : COLOR;
 };
 
 
@@ -57,8 +57,8 @@ PSInput RTWriter(RTInput Input)
 {
     PSInput Output = (PSInput)0;
 
-    Output.Position = Input.hPos;
-    Output.Normal = float4(Input.Normal, 1.0f);
+    Output.Position = float4(Input.hPos.rgb, 1.0f);
+    Output.Normal = float4(Input.Normal.rgb, 1.0f);
 
     return Output;
 }
@@ -69,6 +69,8 @@ RTInput DeferredVS(VSInput Input)
 
     Output.hPos = float4(Input.Position, 1.0f);
     Output.Position = Output.hPos;
+   // Output.Position = normalize(Output.Position);
+  //  Output.Position = Output.hPos;
     Output.Normal = Input.Normal;
     Output.UV = Input.UV;
 
@@ -78,7 +80,7 @@ RTInput DeferredVS(VSInput Input)
 PSFinal DeferredPS(RTInput Input) : SV_Target
 {
     PSFinal Output = (PSFinal)0;
-    float4 Color; //= PositionBuffer.Sample(SampleState, Input.UV);
+    float4 Color; // = PositionBuffer.Sample(SampleState, Input.UV);
  //   Output.Color = Color;
 
     Output.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);

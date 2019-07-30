@@ -38,31 +38,33 @@ private:
 	ID3D11RasterizerState* RasterizerState;
 	IDXGISwapChain* SwapChain;
 
+
 private:
 
 	bool CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewport);
-	bool GetMSAAFeature();
+	static bool GetMSAAFeature(ID3D11Device* Device, GBufferDescription* Descriptor);
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
 
 	static bool GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* PassDesc, ID3D11InputLayout** InputLayout);
 public:
 	
-	void Resize(RTTexture* GBuffer, GBufferDescription& GBufferDescription);
+	void Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, 
+		GBufferDescription& GBufferDescription, ID3D11DepthStencilView* DepthStencilView);
 
 	UINT GetSampleCount() const { return SampleCount; }
 	UINT GetBufferCount() const { return BufferCount; }
 
 	bool GetSampleQuality() const { return SampleQuality; }
 
-	bool CreateDXGI(_In_ HWND* hWnd, _Out_ IDXGIFactory* Factory,
-		UINT Width, UINT Height, _Out_ IDXGISwapChain** OutSwapChain, _Out_ D3D11_VIEWPORT* Viewport);
+	bool CreateDXGI(_In_ HWND* hWnd, _Out_ IDXGIFactory* Factory, UINT Width, UINT Height,
+		_Out_ IDXGISwapChain** OutSwapChain, _Out_ D3D11_VIEWPORT* Viewport, GBufferDescription* Descriptor);
 
 	bool CreateDevice(_In_ ID3D11Device** OutDevice, _In_ ID3D11DeviceContext** OutContext);
 
 	bool CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, _Out_ RTTexture* RenderTarget, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc);
 	bool CreateDepthStencil(_Out_ ID3D11Texture2D** DepthStencil, _In_ D3D11_TEXTURE2D_DESC* DepthStencilDesc);
 
-	bool CreateRenderTargetView(RTTexture* Buffer, _In_ D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc);
+	bool CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GbufferDescriptor);
 	bool CreateDepthStencilView(_Out_ ID3D11DepthStencilView** DepthStencilView, _In_ D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc);
 
 	static bool AllocConstantBuffer(ID3D11Device* Device, Geometry* Geometry);
@@ -72,6 +74,8 @@ public:
 
 	ID3D11Device* GetDevice() { return Device; }
 	ID3D11DeviceContext* GetContext() { return Context; }
+
+	static void ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV);
 
 	D3DHelper() {}
 	D3DHelper(ID3D11Device* NewDevice, ID3D11DeviceContext* NewContext,IDXGISwapChain* NewSwapChain, UINT InWidth, UINT InHeight) : 

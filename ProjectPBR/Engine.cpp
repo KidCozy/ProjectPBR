@@ -1,7 +1,21 @@
 #include "Engine.h"
 
-void Engine::GenerateDescriptors()
+void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 {
+
+	D3D11_TEXTURE2D_DESC* RenderTargetDesc = &Renderer.GetGBufferDescriptor()->RenderTargetDesc;
+
+	RenderTargetDesc->ArraySize = 1;
+	RenderTargetDesc->BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	RenderTargetDesc->CPUAccessFlags = 0;
+	RenderTargetDesc->Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	RenderTargetDesc->Height = Height;
+	RenderTargetDesc->Width = Width;
+	RenderTargetDesc->MipLevels = 1;
+	RenderTargetDesc->MiscFlags = 0;
+	RenderTargetDesc->Usage = D3D11_USAGE_DEFAULT;
+	RenderTargetDesc->SampleDesc.Count = Helper.GetSampleCount();
+	RenderTargetDesc->SampleDesc.Quality = Helper.GetSampleQuality();
 
 
 	D3D11_TEXTURE2D_DESC* DepthStencilDesc = Renderer.GetDepthStencilDesc();
@@ -17,35 +31,40 @@ void Engine::GenerateDescriptors()
 	DepthStencilDesc->SampleDesc.Count = Helper.GetSampleCount();
 	DepthStencilDesc->SampleDesc.Quality = Helper.GetSampleQuality();
 
-	//D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc = Renderer.GetRenderTargetViewDesc();
-	//RenderTargetViewDesc->Format = RenderTargetDesc->Format;
-	//RenderTargetViewDesc->ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	//RenderTargetViewDesc->Texture2D.MipSlice = 1;
+	D3D11_SHADER_RESOURCE_VIEW_DESC* ShaderResourceViewDesc = &Renderer.GetGBufferDescriptor()->SRVDesc;
+	ShaderResourceViewDesc->Format = Renderer.GetGBufferDescriptor()->RenderTargetDesc.Format;
+	ShaderResourceViewDesc->ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	ShaderResourceViewDesc->Texture2D.MipLevels = 1;
+
+	D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc = Renderer.GetRenderTargetViewDesc();
+	RenderTargetViewDesc->Format = Renderer.GetGBufferDescriptor()->RenderTargetDesc.Format;
+	RenderTargetViewDesc->ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	RenderTargetViewDesc->Texture2D.MipSlice = 1;
 	
+
+
 }
 
-void Engine::ClearScreen(XMVECTORF32 ClearColor)
-{
-	for (UINT i = 0; i < BufferCount; i++) {
-		Context->ClearRenderTargetView(Renderer.GetRenderTargetViewPointer()[i], ClearColor);
-	}
-	return;
-}
+
 
 void Engine::PostInitialize()
 {
 
 
 	Helper.CreateDevice(&Device, &Context);
-	Helper.CreateDXGI(&MainWindow, Factory, Width, Height, &SwapChain, Renderer.GetViewport());
+	Helper.CreateDXGI(&MainWindow, Factory, Width, Height, &SwapChain, Renderer.GetViewport(), Renderer.GetGBufferDescriptor());
 	Renderer = RenderManager(Width, Height, Device, Context, BufferCount);
 
-	GenerateDescriptors();
+	GenerateDescriptors(Renderer.GetGBufferDescriptor());
 
-	Helper.CreateRenderTargetView(Renderer.GetGBufferPointer(), Renderer.GetRenderTargetViewDesc());
-	Helper.CreateDepthStencilView(Renderer.GetDepthStencilView(), Renderer.GetDepthStencilViewDesc());
+	//Helper.CreateRenderTargetView(Renderer.GetGBufferPointer(), Renderer.GetGBufferDescriptor());
+	Helper.CreateDepthStencilView(Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
 
-	Helper.Resize(Renderer.GetGBufferPointer(), *Renderer.GetGBufferDescriptor());
+//	D3DHelper::ReleaseGBuffer(Renderer.GetGBufferPointer(), Renderer.GetDepthStencilView());
+
+	Helper.Resize(Renderer.GetMergeBufferPointer(),Renderer.GetGBufferPointer(), *Renderer.GetGBufferDescriptor(), Renderer.GetDepthStencilView());
+	
+
 
 }
 
@@ -65,7 +84,7 @@ void Engine::OnUpdate()
 
 void Engine::OnRender()
 {
-	ClearScreen(Colors::Black);
+
 
 	Renderer.Render();
 

@@ -33,8 +33,8 @@ void Quad::OnInit()
 	Indices.push_back(i[4]);
 	Indices.push_back(i[5]);
 
-	Texture[0] = MaterialResource.GetEffect()->GetVariableByName("PositionBuffer")->AsShaderResource();
-	Texture[1] = MaterialResource.GetEffect()->GetVariableByName("NormalBuffer")->AsShaderResource();
+	Position = MaterialResource.GetEffect()->GetVariableByName("PositionBuffer")->AsShaderResource();
+	Normal = MaterialResource.GetEffect()->GetVariableByName("NormalBuffer")->AsShaderResource();
 }
 
 void Quad::OnUpdate()

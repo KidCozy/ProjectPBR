@@ -38,6 +38,8 @@ protected:
 	std::vector<ID3DX11EffectPass*> Passes;
 	std::vector<D3D11_INPUT_ELEMENT_DESC>* InputLayoutDesc;
 
+	std::vector<ID3DX11EffectShaderResourceVariable*> MaterialShaderResources;
+
 	LPCWSTR Path;
 
 public:
@@ -75,7 +77,12 @@ public:
 	ID3DX11EffectPass** GetPassPointer() { return &CurrentPass; }
 	ID3DX11EffectPass* GetPass(UINT Index) { if (Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index) != nullptr) return Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index); return nullptr; }
 
+	
+	std::vector<ID3D11ShaderResourceView*>* GetShaderResourceContainer() { return &ShaderResources; }
+
 	void SetShaderResourceView(ID3DX11EffectShaderResourceVariable* Object, ID3D11ShaderResourceView* InSRV) { if(InSRV!=nullptr) Object->SetResource(InSRV); }
+
+	void AddTextureResource(ID3D11ShaderResourceView* Texture);
 
 
 	LPCWSTR GetPath() { return Path; }

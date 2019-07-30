@@ -71,7 +71,32 @@ void RenderManager::PostInitialize()
 	D3DHelper::CompileShader(Device, MaterialContainer.data()[0]);
 	D3DHelper::CompileShader(Device, MaterialContainer.data()[1]);
 
-	Context->OMSetRenderTargets(BUFFERCOUNT, &GBuffer[0].RTV, DepthStencilView);
+	ID3D11RenderTargetView* RTV[]
+	{
+		GBuffer[0].RTV,
+		GBuffer[1].RTV,
+	};
+
+	Context->OMSetRenderTargets(BUFFERCOUNT, RTV, DepthStencilView);
+
+	Context->ClearRenderTargetView(RTV[0],DirectX::Colors::Green );
+	Context->ClearRenderTargetView(RTV[1],DirectX::Colors::Green );
+	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+}
+
+void RenderManager::ClearScreen(XMVECTORF32 ClearColor)
+{
+	ID3D11RenderTargetView* RTV[]
+	{
+		GBuffer[0].RTV,
+		GBuffer[1].RTV,
+	};
+	Context->ClearRenderTargetView(RTV[0], DirectX::Colors::Green);
+	Context->ClearRenderTargetView(RTV[1], DirectX::Colors::Green);
+
+	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	return;
 }
 
 void RenderManager::OnInit()
@@ -96,6 +121,15 @@ void RenderManager::OnInit()
 
 void RenderManager::OnUpdate()
 {
+	ID3D11RenderTargetView* RTV[]
+	{
+		GBuffer[0].RTV,
+		GBuffer[1].RTV,
+	};
+
+	Context->OMSetRenderTargets(BUFFERCOUNT, RTV, DepthStencilView);
+	ClearScreen(Colors::Green);
+
 	SetPass(StaticSphere, 0);
 	StaticSphere.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
 }
@@ -104,9 +138,13 @@ void RenderManager::OnRender()
 {
 	DrawObject(&StaticSphere);
 
+	Context->OMSetRenderTargets(1, &MergeBuffer, nullptr);
+	ClearScreen(Colors::Green);
 	SetPass(ScreenQuad, 1);
 	ScreenQuad.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
+
 	DrawObject(&ScreenQuad);
+
 }
 
 void RenderManager::OnRelease()

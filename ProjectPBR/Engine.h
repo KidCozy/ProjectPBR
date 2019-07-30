@@ -24,9 +24,7 @@ private:
 
 
 private:
-	void GenerateDescriptors();
-
-	void ClearScreen(XMVECTORF32 ClearColor);
+	void GenerateDescriptors(GBufferDescription* Descriptor);
 
 protected:
 
