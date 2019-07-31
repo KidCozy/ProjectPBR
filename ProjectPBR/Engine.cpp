@@ -39,9 +39,10 @@ void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 	D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc = Renderer.GetRenderTargetViewDesc();
 	RenderTargetViewDesc->Format = Renderer.GetGBufferDescriptor()->RenderTargetDesc.Format;
 	RenderTargetViewDesc->ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	RenderTargetViewDesc->Texture2D.MipSlice = 1;
 	
-
+	D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc = &Descriptor->DSVDesc;
+	DepthStencilViewDesc->Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	DepthStencilViewDesc->ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 
 }
 
@@ -63,7 +64,8 @@ void Engine::PostInitialize()
 //	D3DHelper::ReleaseGBuffer(Renderer.GetGBufferPointer(), Renderer.GetDepthStencilView());
 
 	Helper.Resize(Renderer.GetMergeBufferPointer(),Renderer.GetGBufferPointer(), *Renderer.GetGBufferDescriptor(), Renderer.GetDepthStencilView());
-	
+	Helper.CreateDepthStencilView(Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
+
 
 
 }

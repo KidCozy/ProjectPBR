@@ -45,7 +45,7 @@ private:
 public:
 	Sphere StaticSphere;
 	Quad ScreenQuad;
-	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
+	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 1000.0f);
 
 	XMMATRIX World;
 

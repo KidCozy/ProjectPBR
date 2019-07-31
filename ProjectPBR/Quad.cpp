@@ -18,6 +18,12 @@ void Quad::OnInit()
 	Vertex v3{ {-1.0f, 1.0f, 0.0f}};
 	Vertex v4{ {1.0f, 1.0f, 0.0f}};
 
+
+	//Vertex v1{ {0.0f, 0.0f, 0.0f} };
+	//Vertex v2{ {1.0f, 0.0f, 0.0f} };
+	//Vertex v3{ {0.0f, 1.0f, 0.0f} };
+	//Vertex v4{ {1.0f, 1.0f, 0.0f} };
+
 	WORD i[6] = { 0,1,2,
 				  1,2,3 };
 

@@ -32,11 +32,6 @@ void RenderManager::DrawObject(Geometry * Object)
 	Object->GetMaterial()->SetViewMatrix(StaticCamera.GetView());
 	Object->GetMaterial()->SetProjectionMatrix(StaticCamera.GetProjection());
 
-	//if (FAILED(StaticSphere.GetMaterial()->GetEffect()->GetTechniqueByName("GeometryTech")->GetPassByIndex(0)->Apply(0, Context)))
-	//{
-	//	MessageBox(NULL, L"Apply failed.", 0, 0);
-	//}
-
 	BindBuffer(Object);
 
 	Context->DrawIndexed(Object->GetIndexCount(), 0, 0);
@@ -46,9 +41,7 @@ void RenderManager::DrawObject(Geometry * Object)
 
 void RenderManager::SetPass(Geometry& Object, UINT Index)
 {
-	ID3DX11EffectPass* Pass = Object.GetMaterial()->GetPass(Index);
-
-	if (FAILED(Pass->Apply(0, Context)))
+	if (FAILED(Object.GetMaterial()->GetPass(Index)->Apply(0, Context)))
 	{
 		MessageBox(NULL, L"Apply Failed.", 0, 0);
 	}
@@ -92,11 +85,10 @@ void RenderManager::ClearScreen(XMVECTORF32 ClearColor)
 		GBuffer[0].RTV,
 		GBuffer[1].RTV,
 	};
-	Context->ClearRenderTargetView(RTV[0], DirectX::Colors::Green);
-	Context->ClearRenderTargetView(RTV[1], DirectX::Colors::Green);
+	Context->ClearRenderTargetView(RTV[0], ClearColor);
+	Context->ClearRenderTargetView(RTV[1], ClearColor);
 
 	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	return;
 }
 
 void RenderManager::OnInit()
@@ -126,23 +118,27 @@ void RenderManager::OnUpdate()
 		GBuffer[0].RTV,
 		GBuffer[1].RTV,
 	};
-
 	Context->OMSetRenderTargets(BUFFERCOUNT, RTV, DepthStencilView);
-	ClearScreen(Colors::Green);
+
+	Context->ClearRenderTargetView(RTV[0], DirectX::Colors::White);
+	Context->ClearRenderTargetView(RTV[1], DirectX::Colors::White);
+	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	SetPass(StaticSphere, 0);
 	StaticSphere.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
+	DrawObject(&StaticSphere);
+
 }
 
 void RenderManager::OnRender()
 {
-	DrawObject(&StaticSphere);
 
 	Context->OMSetRenderTargets(1, &MergeBuffer, nullptr);
-	ClearScreen(Colors::Green);
-	SetPass(ScreenQuad, 1);
-	ScreenQuad.GetMaterial()->SetWorldMatrix(XMMatrixIdentity());
+	Context->ClearRenderTargetView(MergeBuffer, DirectX::Colors::Green);
 
+	SetPass(ScreenQuad, 1);
+	//ScreenQuad.SetPosition(GBuffer[0].SRV);
+	//ScreenQuad.SetPosition(GBuffer[1].SRV);
 	DrawObject(&ScreenQuad);
 
 }

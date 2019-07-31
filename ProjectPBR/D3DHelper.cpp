@@ -76,7 +76,9 @@ bool D3DHelper::CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewp
 
 	*OutViewport = V;
 
-	D3D11_RASTERIZER_DESC RasterizerDesc = {};
+	D3D11_RASTERIZER_DESC RasterizerDesc{};
+
+	ZeroMemory(&RasterizerDesc, sizeof(RasterizerDesc));
 
 	RasterizerDesc.CullMode = D3D11_CULL_NONE;
 	RasterizerDesc.AntialiasedLineEnable = false;
@@ -221,14 +223,15 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 		{
 			MessageBox(NULL, L"Failed to create shader resource view.", 0, 0);
 		}
-		if (FAILED(Device->CreateRenderTargetView(GBuffer[i].Texture, 0, &GBuffer[i].RTV)))
+		if (FAILED(Device->CreateRenderTargetView(GBuffer[i].Texture, &GBufferDescription.RTVDesc, &GBuffer[i].RTV)))
 		{
 			MessageBox(NULL, L"Failed to create render target view.", 0, 0);
 		}
 
 	}
 
-//	Context->OMSetRenderTargets(1, &GBuffer[0].RTV, DepthStencilView);
+
+
 
 }
 
@@ -256,7 +259,7 @@ bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain,
 
 bool D3DHelper::CreateDepthStencil(_Out_ ID3D11Texture2D ** DepthStencil, _In_ D3D11_TEXTURE2D_DESC* DepthStencilDesc)
 {
-	if (FAILED(Device->CreateTexture2D(DepthStencilDesc, nullptr, DepthStencil))) 
+	if (FAILED(Device->CreateTexture2D(DepthStencilDesc, 0, DepthStencil))) 
 	{
 		MessageBox(NULL, L"Failed to create depth stencil texture.", 0, 0);
 		exit(-1);
@@ -315,11 +318,14 @@ bool D3DHelper::CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilVie
 
 	CreateDepthStencil(&DepthStencil, &DepthStencilDesc);
 
-	if (FAILED(Device->CreateDepthStencilView(DepthStencil, 0, DepthStencilView)))
+	if (FAILED(Device->CreateDepthStencilView(DepthStencil, DepthStencilViewDesc, DepthStencilView)))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil view.", 0, 0);
 		exit(-1);
 	}
+
+	DepthStencil->Release();
+
 	return true;
 }
 bool D3DHelper::AllocConstantBuffer(ID3D11Device* Device, Geometry* Geometry)
@@ -388,6 +394,10 @@ void D3DHelper::ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV)
 {
 	if (GBuffer[0].Texture == nullptr)
 		return;
+	
+	DSV->Release();
+
+
 	for (UINT i = 0; i < BUFFERCOUNT; i++)
 	{
 			GBuffer[i].RTV->Release();
