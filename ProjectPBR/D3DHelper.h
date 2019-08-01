@@ -32,16 +32,16 @@ private:
 	bool SampleQuality = 0;
 
 	DXGI_FORMAT RenderTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	
+	D3D11_VIEWPORT OutViewport;
+
 	ID3D11Device* Device;
 	ID3D11DeviceContext* Context;
 	ID3D11RasterizerState* RasterizerState;
 	IDXGISwapChain* SwapChain;
 
-
 private:
 
-	bool CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewport);
+	bool CreateViewport(UINT Width, UINT Height);
 	static bool GetMSAAFeature(ID3D11Device* Device, GBufferDescription* Descriptor);
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
 

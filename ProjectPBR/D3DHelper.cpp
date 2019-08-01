@@ -23,7 +23,7 @@ bool D3DHelper::CreateDXGI(_In_ HWND* hWnd, _Out_ IDXGIFactory* Factory, UINT Wi
 	SwapChainDesc.Windowed = true;
 	SwapChainDesc.OutputWindow = *hWnd;
 	SwapChainDesc.Flags = 0;
-	SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
+	SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
 	if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&Factory))) {
 		MessageBox(NULL, L"Failed to create dxgi factory", 0, 0);
@@ -37,7 +37,7 @@ bool D3DHelper::CreateDXGI(_In_ HWND* hWnd, _Out_ IDXGIFactory* Factory, UINT Wi
 
 	*OutSwapChain = SwapChain;
 
-	CreateViewport(Width, Height, Viewport);
+	CreateViewport(Width, Height);
 
 	return true;
 }
@@ -63,7 +63,7 @@ bool D3DHelper::CreateDevice(ID3D11Device** OutDevice, ID3D11DeviceContext** Out
 	return true;
 }
 
-bool D3DHelper::CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewport)
+bool D3DHelper::CreateViewport(UINT Width, UINT Height)
 {
 	D3D11_VIEWPORT V;
 
@@ -74,7 +74,7 @@ bool D3DHelper::CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewp
 	V.TopLeftX = 0;
 	V.TopLeftY = 0;
 
-	*OutViewport = V;
+	OutViewport = V;
 
 	D3D11_RASTERIZER_DESC RasterizerDesc{};
 
@@ -87,7 +87,7 @@ bool D3DHelper::CreateViewport(UINT Width, UINT Height, D3D11_VIEWPORT* OutViewp
 
 	Device->CreateRasterizerState(&RasterizerDesc, &RasterizerState);
 	Context->RSSetState(RasterizerState);
-	Context->RSSetViewports(1, OutViewport);
+	Context->RSSetViewports(1, &OutViewport);
 
 	return true;
 }
@@ -191,6 +191,12 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 {
 	HRESULT hr;
 	ID3D11Texture2D* BackBuffer;
+	ID3D11RenderTargetView* MergeBuffer;
+	if (*Merger != nullptr)
+	{
+		MergeBuffer = *Merger;
+		MergeBuffer->Release();
+	}
 
 	if (FAILED(SwapChain->ResizeBuffers(1, GBufferDescription.RenderTargetDesc.Width, GBufferDescription.RenderTargetDesc.Height, SWAPCHAIN_FORMAT, 0)))
 	{
@@ -209,7 +215,6 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 
 	BackBuffer->Release();
 
-	Context->OMSetRenderTargets(1, Merger, nullptr);
 
 	ReleaseGBuffer(GBuffer, DepthStencilView);
 
@@ -230,8 +235,7 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 
 	}
 
-
-
+	Context->OMSetRenderTargets(1, Merger, DepthStencilView);
 
 }
 
@@ -240,17 +244,11 @@ bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain,
 {
 	for (UINT i = 0; i < BUFFERCOUNT; i++)
 	{
-		if (FAILED(Device->CreateTexture2D(RenderTargetDesc, NULL, &Buffer[i].Texture)))
+		if (FAILED(Device->CreateTexture2D(RenderTargetDesc, 0, &Buffer[i].Texture)))
 		{
 			MessageBox(NULL, L"Failed to create render target texture.", 0, 0);
 			exit(-1);
 		}
-
-		//if (FAILED(SwapChain->GetBuffer(i, __uuidof(ID3D11Texture2D), (void**)&Buffer[i].Texture)))
-		//{
-		//	MessageBox(NULL, L"Failed to create render target texture.", 0, 0);
-		//	exit(-1);
-		//}
 	}
 
 	return true;
@@ -259,7 +257,7 @@ bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain,
 
 bool D3DHelper::CreateDepthStencil(_Out_ ID3D11Texture2D ** DepthStencil, _In_ D3D11_TEXTURE2D_DESC* DepthStencilDesc)
 {
-	if (FAILED(Device->CreateTexture2D(DepthStencilDesc, 0, DepthStencil))) 
+	if (FAILED(Device->CreateTexture2D(DepthStencilDesc, 0, &*DepthStencil))) 
 	{
 		MessageBox(NULL, L"Failed to create depth stencil texture.", 0, 0);
 		exit(-1);
@@ -289,11 +287,18 @@ bool D3DHelper::CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GB
 
 	for (UINT i = 0; i < BUFFERCOUNT; i++)
 	{
-		if (FAILED(Device->CreateRenderTargetView(Buffer[i].Texture, 0, &Buffer[i].RTV)))
+		if (FAILED(Device->CreateRenderTargetView(Buffer[i].Texture, &GBufferDescriptor->RTVDesc, &Buffer[i].RTV)))
 		{
 			MessageBox(NULL, L"Failed to create render target view.", 0, 0);
 			exit(-1);
 		}
+
+		if (FAILED(Device->CreateShaderResourceView(Buffer[i].Texture, &GBufferDescriptor->SRVDesc, &Buffer[i].SRV)))
+		{
+			MessageBox(NULL, L"Failed to create shader resource view.", 0, 0);
+		}
+
+
 	}
 
 	return true;
@@ -318,7 +323,7 @@ bool D3DHelper::CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilVie
 
 	CreateDepthStencil(&DepthStencil, &DepthStencilDesc);
 
-	if (FAILED(Device->CreateDepthStencilView(DepthStencil, DepthStencilViewDesc, DepthStencilView)))
+	if (FAILED(Device->CreateDepthStencilView(DepthStencil, NULL, &*DepthStencilView)))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil view.", 0, 0);
 		exit(-1);
@@ -395,7 +400,7 @@ void D3DHelper::ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV)
 	if (GBuffer[0].Texture == nullptr)
 		return;
 	
-	DSV->Release();
+	//DSV->Release();
 
 
 	for (UINT i = 0; i < BUFFERCOUNT; i++)

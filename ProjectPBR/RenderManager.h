@@ -24,7 +24,7 @@ private:
 	UINT Width;
 	UINT Height;
 
-	ID3D11RenderTargetView* MergeBuffer;
+	ID3D11RenderTargetView* MergeBuffer = nullptr;
 
 	RTTexture GBuffer[BUFFERCOUNT];
 	GBufferDescription GBufferDesc;

@@ -33,7 +33,7 @@ struct PSInput
 
 struct PSFinal
 {
-    float4 Color : COLOR;
+    float4 Color : SV_Target;
 };
 
 
@@ -57,8 +57,8 @@ PSInput RTWriter(RTInput Input)
 {
     PSInput Output = (PSInput)0;
 
-    Output.Position = float4(Input.hPos.rgb, 1.0f);
-    Output.Normal = float4(Input.Normal.rgb, 1.0f);
+    Output.Position = float4(Input.hPos.xyz, 1.0f);
+    Output.Normal = float4(Input.Normal.xyz, 1.0f);
 
     return Output;
 }
@@ -81,8 +81,18 @@ PSFinal DeferredPS(RTInput Input) : SV_Target
     PSFinal Output = (PSFinal)0;
   //  float4 Color; // = PositionBuffer.Sample(SampleState, Input.UV);
  //   Output.Color = Color;
-
+    
     Output.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    return Output;
+}
+
+PSFinal ForwardPS(RTInput Input) : SV_Target
+{
+    PSFinal Output = (PSFinal) 0;
+   float4 Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    Output.Color = Color;
 
     return Output;
 }
@@ -99,5 +109,12 @@ technique11 GeometryTech
     {
         SetVertexShader(CompileShader(vs_5_0, DeferredVS()));
         SetPixelShader(CompileShader(ps_5_0, DeferredPS()));
+    }
+
+    pass Forward0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS()));
+        SetPixelShader(CompileShader(ps_5_0, ForwardPS()));
+
     }
 };
