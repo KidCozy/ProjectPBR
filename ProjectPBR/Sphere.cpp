@@ -6,7 +6,7 @@ void Sphere::OnInit()
 	Vertices.clear();
 	Indices.clear();
 
-	Vertex topVertex{ { 0.0f, +Radius, 0.0f }, { +1.0f, 0.0f, 1.0f } };
+	Vertex topVertex{ { 0.0f, +Radius, 0.0f}, { +1.0f, 0.0f, 1.0f} };
 	Vertex bottomVertex{ { 0.0f, -Radius, 0.0f}, {-1.0f, 0.0f, 1.0f} };
 
 	Vertices.push_back(topVertex);

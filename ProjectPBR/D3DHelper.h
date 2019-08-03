@@ -9,7 +9,7 @@
 #include<D3DX11.h>
 #include<dxgi.h>
 #include<d3dx11effect.h>
-#include<D3Dcompiler.h>
+#include<d3dcompiler.h>
 
 #include<Windows.h>
 #include<sal.h>
@@ -38,6 +38,7 @@ private:
 	ID3D11DeviceContext* Context;
 	ID3D11RasterizerState* RasterizerState;
 	IDXGISwapChain* SwapChain;
+	ID3D11DepthStencilState* DepthStencilState;
 
 private:
 
@@ -45,11 +46,11 @@ private:
 	static bool GetMSAAFeature(ID3D11Device* Device, GBufferDescription* Descriptor);
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
 
-	static bool GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* PassDesc, ID3D11InputLayout** InputLayout);
+	static bool GenerateInputLayout(ID3D11Device* Device, Material* Resource, ID3D11InputLayout** InputLayout);
 public:
 	
 	void Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, 
-		GBufferDescription& GBufferDescription, ID3D11DepthStencilView* DepthStencilView);
+		GBufferDescription& GBufferDescription, ID3D11DepthStencilView** DepthStencilView);
 
 	UINT GetSampleCount() const { return SampleCount; }
 	UINT GetBufferCount() const { return BufferCount; }
@@ -65,7 +66,7 @@ public:
 	bool CreateDepthStencil(_Out_ ID3D11Texture2D** DepthStencil, _In_ D3D11_TEXTURE2D_DESC* DepthStencilDesc);
 
 	bool CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GbufferDescriptor);
-	bool CreateDepthStencilView(_Out_ ID3D11DepthStencilView** DepthStencilView, _In_ D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc);
+	bool CreateDepthStencilView(_Out_ ID3D11DepthStencilView** DepthStencilView, D3D11_TEXTURE2D_DESC* DepthStencilDesc, _In_ D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc);
 
 	static bool AllocConstantBuffer(ID3D11Device* Device, Geometry* Geometry);
 	static bool GenerateEffect(ID3D11Device* Device, Material* Resource);

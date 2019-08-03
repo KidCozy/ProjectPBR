@@ -9,7 +9,7 @@ bool D3DHelper::CreateDXGI(_In_ HWND* hWnd, _Out_ IDXGIFactory* Factory, UINT Wi
 	bool MSAA = GetMSAAFeature(Device, Descriptor);
 
 	SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	SwapChainDesc.BufferCount = BufferCount;
+	SwapChainDesc.BufferCount = 1;
 	SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	SwapChainDesc.BufferDesc.Height = Height;
 	SwapChainDesc.BufferDesc.Width = Width;
@@ -65,10 +65,10 @@ bool D3DHelper::CreateDevice(ID3D11Device** OutDevice, ID3D11DeviceContext** Out
 
 bool D3DHelper::CreateViewport(UINT Width, UINT Height)
 {
-	D3D11_VIEWPORT V;
+	D3D11_VIEWPORT V{};
 
-	V.Height = Height;
-	V.Width = Width;
+	V.Height = (float)Height;
+	V.Width = (float)Width;
 	V.MinDepth = 0.0f;
 	V.MaxDepth = 1.0f;
 	V.TopLeftX = 0;
@@ -81,6 +81,7 @@ bool D3DHelper::CreateViewport(UINT Width, UINT Height)
 	ZeroMemory(&RasterizerDesc, sizeof(RasterizerDesc));
 
 	RasterizerDesc.CullMode = D3D11_CULL_NONE;
+	RasterizerDesc.FrontCounterClockwise = false;
 	RasterizerDesc.AntialiasedLineEnable = false;
 	RasterizerDesc.DepthClipEnable = false;
 	RasterizerDesc.FillMode = D3D11_FILL_SOLID;
@@ -106,17 +107,42 @@ bool D3DHelper::GetMSAAFeature(ID3D11Device* Device, GBufferDescription* Descrip
 	return Descriptor->SamplerDesc.Count == 1 ? 0 : Descriptor->SamplerDesc.Count;
 }
 
-bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* PassDesc, ID3D11InputLayout** InputLayout)
+bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, Material* Resource, ID3D11InputLayout** InputLayout)
 {
 	ID3D11ShaderReflection* Reflect;
 	D3D11_SHADER_DESC ShaderDesc{};
 	std::vector<D3D11_INPUT_ELEMENT_DESC> InputDesc;
 
-	if (FAILED(D3DReflect(PassDesc->pIAInputSignature, PassDesc->IAInputSignatureSize, IID_ID3D11ShaderReflection, (void**)&Reflect)))
-		return false;
+	ID3DBlob* ErrBlob, *VBlob;
+
+	DWORD ShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+	HRESULT hr;
+
+#if defined _DEBUG || defined DEBUG
+	ShaderFlags = D3DCOMPILE_DEBUG;
+#endif
+
+	D3DX11CompileFromFile(Resource->GetPath(), NULL, NULL, "VS", "vs_5_0",
+		ShaderFlags, 0, NULL, &VBlob, &ErrBlob, &hr);
+
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to compile vs", 0, 0);
+	}
+
+	
+	hr = D3DReflect(VBlob->GetBufferPointer(), VBlob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&Reflect);
+	if(FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to reflect", 0, 0);
+
+	}
 
 	if (FAILED(Reflect->GetDesc(&ShaderDesc)))
-		return false;
+	{
+		MessageBox(NULL, L"Failed to getting decription from ID3D11ShaderReflection.", 0, 0);
+
+	}
 
 	for (UINT i = 0; i < ShaderDesc.InputParameters; i++)
 	{
@@ -179,7 +205,7 @@ bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* Pass
 	Reflect->Release();
 
 	if (FAILED(Device->CreateInputLayout(InputDesc.data(), InputDesc.size(),
-		PassDesc->pIAInputSignature,PassDesc->IAInputSignatureSize, InputLayout)))
+		VBlob->GetBufferPointer(),VBlob->GetBufferSize(), InputLayout)))
 		return false;
 
 	
@@ -187,7 +213,7 @@ bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, D3DX11_PASS_DESC* Pass
 	return true;
 }
 
-void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBufferDescription& GBufferDescription, ID3D11DepthStencilView* DepthStencilView)
+void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBufferDescription& GBufferDescription, ID3D11DepthStencilView** DepthStencilView)
 {
 	HRESULT hr;
 	ID3D11Texture2D* BackBuffer;
@@ -202,7 +228,7 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 	{
 		MessageBox(NULL, L"Failed to resizing swapchain buffers.", 0, 0);
 	}
-
+	
 	if (FAILED(SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer)))
 	{
 		MessageBox(NULL, L"Failed to resizing", 0, 0);
@@ -213,29 +239,39 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 		MessageBox(NULL, L"Failed to create render target view.", 0, 0);
 	}
 
+	if (FAILED(Device->CreateDepthStencilState(&GBufferDescription.DepthStencilInfoDesc, &DepthStencilState)))
+	{
+		MessageBox(NULL, L"Failed to create depth stencil state.", 0, 0);
+	}
+
+	CreateDepthStencilView(DepthStencilView,&GBufferDescription.DepthStencilDesc, &GBufferDescription.DSVDesc);
+
+	Context->OMSetRenderTargets(1, &*Merger, &**DepthStencilView);
+	//Context->OMSetDepthStencilState(DepthStencilState, 0);
+
 	BackBuffer->Release();
 
 
-	ReleaseGBuffer(GBuffer, DepthStencilView);
+	//ReleaseGBuffer(GBuffer, *DepthStencilView);
 
-	for (UINT i = 0; i < BUFFERCOUNT; i++)
-	{
-		if (FAILED(Device->CreateTexture2D(&GBufferDescription.RenderTargetDesc, 0, &GBuffer[i].Texture)))
-		{
-			MessageBox(NULL, L"Failed to create texture", 0, 0);
-		}
-		if (FAILED(Device->CreateShaderResourceView(GBuffer[i].Texture, &GBufferDescription.SRVDesc, &GBuffer[i].SRV)))
-		{
-			MessageBox(NULL, L"Failed to create shader resource view.", 0, 0);
-		}
-		if (FAILED(Device->CreateRenderTargetView(GBuffer[i].Texture, &GBufferDescription.RTVDesc, &GBuffer[i].RTV)))
-		{
-			MessageBox(NULL, L"Failed to create render target view.", 0, 0);
-		}
+	//for (UINT i = 0; i < BUFFERCOUNT; i++)
+	//{
+	//	if (FAILED(Device->CreateTexture2D(&GBufferDescription.RenderTargetDesc, 0, &GBuffer[i].Texture)))
+	//	{
+	//		MessageBox(NULL, L"Failed to create texture", 0, 0);
+	//	}
+	//	if (FAILED(Device->CreateShaderResourceView(GBuffer[i].Texture, &GBufferDescription.SRVDesc, &GBuffer[i].SRV)))
+	//	{
+	//		MessageBox(NULL, L"Failed to create shader resource view.", 0, 0);
+	//	}
+	//	if (FAILED(Device->CreateRenderTargetView(GBuffer[i].Texture, &GBufferDescription.RTVDesc, &GBuffer[i].RTV)))
+	//	{
+	//		MessageBox(NULL, L"Failed to create render target view.", 0, 0);
+	//	}
 
-	}
+	//}
 
-	Context->OMSetRenderTargets(1, Merger, DepthStencilView);
+
 
 }
 
@@ -304,26 +340,24 @@ bool D3DHelper::CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GB
 	return true;
 }
 
-bool D3DHelper::CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilView, D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc)
+bool D3DHelper::CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilView, D3D11_TEXTURE2D_DESC* DepthStencilDesc, D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc)
 {
 	ID3D11Texture2D* DepthStencil;
 
-	D3D11_TEXTURE2D_DESC DepthStencilDesc{};
-	DepthStencilDesc.ArraySize = 1;
-	DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	DepthStencilDesc.CPUAccessFlags = 0;
-	DepthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	DepthStencilDesc.Height = Height;
-	DepthStencilDesc.Width = Width;
-	DepthStencilDesc.MipLevels = 1;
-	DepthStencilDesc.MiscFlags = 0;
-	DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	DepthStencilDesc.SampleDesc.Count = SampleCount;
-	DepthStencilDesc.SampleDesc.Quality = SampleQuality;
+	//D3D11_TEXTURE2D_DESC DepthStencilDesc{};
+	//DepthStencilDesc.ArraySize = 1;
+	//DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	//DepthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	//DepthStencilDesc.Height = Height;
+	//DepthStencilDesc.Width = Width;
+	//DepthStencilDesc.MipLevels = 1;
+	//DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	//DepthStencilDesc.SampleDesc.Count = SampleCount;
+	//DepthStencilDesc.SampleDesc.Quality = SampleQuality;
 
-	CreateDepthStencil(&DepthStencil, &DepthStencilDesc);
+	CreateDepthStencil(&DepthStencil, DepthStencilDesc);
 
-	if (FAILED(Device->CreateDepthStencilView(DepthStencil, NULL, &*DepthStencilView)))
+	if (FAILED(Device->CreateDepthStencilView(DepthStencil, DepthStencilViewDesc, DepthStencilView)))
 	{
 		MessageBox(NULL, L"Failed to create depth stencil view.", 0, 0);
 		exit(-1);
@@ -381,6 +415,7 @@ bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
 	ID3DBlob* ErrBlob;
 
 	DWORD ShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+	HRESULT hr;
 
 #if defined _DEBUG || defined DEBUG
 	ShaderFlags = D3DCOMPILE_DEBUG;
@@ -405,9 +440,9 @@ void D3DHelper::ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV)
 
 	for (UINT i = 0; i < BUFFERCOUNT; i++)
 	{
-			GBuffer[i].RTV->Release();
-			GBuffer[i].SRV->Release();
-			GBuffer[i].Texture->Release();
+		GBuffer[i].RTV->Release();
+		GBuffer[i].SRV->Release();
+		GBuffer[i].Texture->Release();
 	}
 
 }
@@ -418,7 +453,7 @@ bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 {
 	ID3DBlob* VertexBlob, *PixelBlob, *ErrorBlob;
 	HRESULT hr;
-	D3DX11_PASS_DESC Desc;
+	D3DX11_PASS_DESC Desc{};
 
 	if (!GenerateEffect(Device, Resource))
 	{
@@ -432,10 +467,17 @@ bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 	Resource->SetProjectionMatrixPointer(Resource->GetEffect()->GetVariableByName("Projection")->AsMatrix());
 
 
-	Resource->GetEffect()->GetTechniqueByName("GemometryTech")->GetPassByIndex(0)->GetDesc(&Desc);
-	GenerateInputLayout(Device, &Desc, &Resource->GetInputLayout());
+	if (FAILED(Resource->GetEffect()->GetTechniqueByName("GeometryTech")->GetPassByIndex(0)->GetDesc(&Desc)))
+	{
+		MessageBox(NULL, L"Failed to getting descriptor from the pass.", 0, 0);
+	}
+
+
 	
-	if(FAILED(Resource->SetPass(0)))
+
+	GenerateInputLayout(Device, Resource, &Resource->GetInputLayout());
+	
+	if(FAILED(Resource->SetPass(2)))
 		MessageBox(NULL, L"Failed to set default pass.", 0, 0);
 
 	return true;

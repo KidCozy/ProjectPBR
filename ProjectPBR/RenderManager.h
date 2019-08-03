@@ -12,10 +12,6 @@
 
 #define DEFAULT_MATERIALSIZE 2
 
-static const D3D11_INPUT_ELEMENT_DESC VERTEX_DESCRIPTION[]{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 } };
-
 class RenderManager :
 	public VirtualObject
 {
@@ -26,15 +22,12 @@ private:
 
 	ID3D11RenderTargetView* MergeBuffer = nullptr;
 
-	RTTexture GBuffer[BUFFERCOUNT];
+	RTTexture GBuffer[BUFFERCOUNT] = { nullptr };
 	GBufferDescription GBufferDesc;
 	D3D11_TEXTURE2D_DESC RenderTargetDesc;
 
-	ID3D11DepthStencilView* DepthStencilView;
+	ID3D11DepthStencilView* DepthStencilView = nullptr;
 	D3D11_TEXTURE2D_DESC DepthStencilDesc{};
-
-	std::vector<D3D11_INPUT_ELEMENT_DESC> DefaultInputLayout;
-	std::vector<D3D11_INPUT_ELEMENT_DESC> ScreenQuadInputLayout;
 
 	std::vector<Material*> MaterialContainer;
 
@@ -45,7 +38,7 @@ private:
 public:
 	Sphere StaticSphere;
 	Quad ScreenQuad;
-	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 1000.0f);
+	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
 
 	XMMATRIX World;
 
@@ -88,6 +81,8 @@ public:
 	D3D11_TEXTURE2D_DESC* GetDepthStencilDesc() { return &GBufferDesc.DepthStencilDesc; }
 	D3D11_DEPTH_STENCIL_VIEW_DESC* GetDepthStencilViewDesc() { return &GBufferDesc.DSVDesc; }
 
+	D3D11_DEPTH_STENCIL_DESC* GetDepthStencilInfoDesc() { return &GBufferDesc.DepthStencilInfoDesc; }
+		
 	D3D11_VIEWPORT* GetViewport() { return &MainViewport; }
 
 

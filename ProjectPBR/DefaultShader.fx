@@ -3,7 +3,7 @@ SamplerState SampleState : register(s0);
 Texture2D PositionBuffer;
 Texture2D NormalBuffer;
 
-cbuffer ConstantBuffer : register(b1)
+cbuffer ConstantBuffer : register(b0)
 {
     float4x4 World;
     float4x4 View;
@@ -14,12 +14,13 @@ struct VSInput
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
-    float2 UV : TEXCOORD0;
+
+    //float2 UV : TEXCOORD0;
 };
 
 struct RTInput
 {
-    float4 hPos : POSITION;
+    float4 hPos : HPOS;
     float4 Position : SV_POSITION;
     float3 Normal : TEXCOORD0;
     float2 UV : TEXCOORD1;
@@ -29,6 +30,7 @@ struct PSInput
 {
     float4 Position : SV_Target0;
     float4 Normal : SV_Target1;
+
 };
 
 struct PSFinal
@@ -36,6 +38,11 @@ struct PSFinal
     float4 Color : SV_Target;
 };
 
+struct ColorOutput
+{
+    float4 Position : SV_POSITION;
+    float4 Color : COLOR;
+};
 
 RTInput VS(VSInput Input)
 {
@@ -53,12 +60,25 @@ RTInput VS(VSInput Input)
     return Output;
 }
 
+ColorOutput BasicVS(VSInput Input)
+{
+    ColorOutput Output = (ColorOutput) 0;
+    Output.Position = float4(Input.Position, 1.0f);
+    Output.Position = mul(Output.Position, World);
+    Output.Position = mul(Output.Position, View);
+    Output.Position = mul(Output.Position, Projection);
+
+    return Output;
+
+}
+
+
 PSInput RTWriter(RTInput Input)
 {
     PSInput Output = (PSInput)0;
 
     Output.Position = float4(Input.hPos.xyz, 1.0f);
-    Output.Normal = float4(Input.Normal.xyz, 1.0f);
+    Output.Normal = float4(Input.Normal, 1.0f);
 
     return Output;
 }
@@ -71,12 +91,12 @@ RTInput DeferredVS(VSInput Input)
     Output.Position = Output.hPos;
    // Output.Position = normalize(Output.Position);
   //  Output.Position = Output.hPos;
-    Output.UV = Input.UV;
+   // Output.UV = Input.UV;
 
     return Output;
 }
 
-PSFinal DeferredPS(RTInput Input) : SV_Target
+PSFinal DeferredPS(RTInput Input)
 {
     PSFinal Output = (PSFinal)0;
   //  float4 Color; // = PositionBuffer.Sample(SampleState, Input.UV);
@@ -87,14 +107,11 @@ PSFinal DeferredPS(RTInput Input) : SV_Target
     return Output;
 }
 
-PSFinal ForwardPS(RTInput Input) : SV_Target
+float4 ForwardPS(ColorOutput Input) : SV_Target
 {
-    PSFinal Output = (PSFinal) 0;
-   float4 Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    float4 Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    Output.Color = Color;
-
-    return Output;
+    return Color;
 }
 
 technique11 GeometryTech
@@ -113,7 +130,7 @@ technique11 GeometryTech
 
     pass Forward0
     {
-        SetVertexShader(CompileShader(vs_5_0, VS()));
+        SetVertexShader(CompileShader(vs_5_0, BasicVS()));
         SetPixelShader(CompileShader(ps_5_0, ForwardPS()));
 
     }
