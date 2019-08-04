@@ -3,6 +3,8 @@ SamplerState SampleState : register(s0);
 Texture2D PositionBuffer;
 Texture2D NormalBuffer;
 
+float2 PixelOffset;
+
 cbuffer ConstantBuffer : register(b0)
 {
     float4x4 World;
@@ -41,6 +43,15 @@ struct ColorOutput
 {
     float4 Position : SV_POSITION;
     float4 Color : COLOR;
+};
+
+float GaussFilter5x5[5][5] =
+{
+    1, 4, 6, 4, 1,
+   4, 16, 24, 16, 4,
+   6, 24, 36, 24, 6,
+   4, 16, 24, 16, 4,
+   1, 4, 6, 4, 1
 };
 
 RTInput VS(VSInput Input)
@@ -99,11 +110,37 @@ RTInput DeferredVS(VSInput Input)
 PSFinal DeferredPS(RTInput Input)
 {
     PSFinal Output = (PSFinal)0;
-    float3 Color = PositionBuffer.Sample(SampleState, Input.UV).rgb;
-    Output.Color = float4(Color, 1.0f);
-    
- //   Output.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
+    float3 Position = PositionBuffer.Sample(SampleState, Input.UV).rgb;
+
+    float3 Normal = NormalBuffer.Sample(SampleState, Input.UV).rgb;
+
+    float3 FinalColor = 0;
+    float3 GaussColor = 0;
+    
+    FinalColor = Normal;
+
+    for (int y = -2; y <= 2; ++y)
+    {
+        for (int x = -2; x <= 2; ++x)
+        {
+            float2 Offset = float2(x, y) * PixelOffset;
+            float3 NormalPixel = NormalBuffer.Sample(SampleState, Input.UV+Offset).rgb;
+            GaussColor += GaussFilter5x5[y + 2][x + 2] * NormalPixel;
+            GaussColor /= 3.1f;
+        }
+    }
+
+    float3 Ambient = float3(0.05f, 0.05f, 0.05f);
+    if (length(Normal) > 0.0f)
+    {
+        float3 lightDir = normalize(float3(1.0f, 1.0f, 1.0f));
+        float3 luminance = saturate(dot(lightDir, GaussColor));
+        FinalColor = luminance;
+    }
+
+    Output.Color = float4(FinalColor, 1.0f);
+    
     return Output;
 }
 

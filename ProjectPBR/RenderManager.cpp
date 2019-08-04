@@ -106,7 +106,7 @@ void RenderManager::OnInit()
 	SetTechnique(MaterialContainer.data()[0]->GetEffect()->GetTechniqueByName("GeometryTech"));
 
 	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
-	StaticSphere.SetProperty(1.0f, 32, 64);
+	StaticSphere.SetProperty(1.0f, 128, 128);
 	StaticSphere.Init();
 
 	ScreenQuad.SetMaterial(MaterialContainer.data()[0]);
@@ -127,11 +127,12 @@ void RenderManager::OnInit()
 // 2. G버퍼에 렌더
 // 3. G버퍼에 렌더된 이미지 (텍스쳐 정보)가 SRV로 넘어간다.
 // 4. SRV를 이펙트에 넘기고 이펙트에서 넘어간 버퍼 정보들 (포지션, 노멀)을 이용해 라이팅 연산을 수행한다.
-// 5. 병합 버퍼를 출력한다.
+// 5. 픽셀 쉐이더 출력 정보들이 스크린 쿼드의 텍스쳐로 샘플링된다.
+// 5. 스크린 쿼드가 렌더된 병합버퍼를 출력한다. 
 
 void RenderManager::OnUpdate()
 {
-	ClearScreen(DirectX::Colors::Gray);
+	ClearScreen(DirectX::Colors::Green);
 
 }
 
@@ -143,6 +144,8 @@ void RenderManager::OnRender()
 
 	ScreenQuad.SetPosition(GBuffer[0].SRV);
 	ScreenQuad.SetNormal(GBuffer[1].SRV);
+	ScreenQuad.SetPixelOffset(&GBufferVar.ViewportDimensions);
+
 	DrawObject(&ScreenQuad, RENDERBUFFER_MERGE);
 
 }

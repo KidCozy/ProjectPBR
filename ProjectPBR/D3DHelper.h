@@ -29,6 +29,8 @@ private:
 	UINT SampleCount = 1;
 	UINT BufferCount = BUFFERCOUNT;
 
+
+
 	bool SampleQuality = 0;
 
 	DXGI_FORMAT RenderTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -49,7 +51,9 @@ private:
 	static bool GenerateInputLayout(ID3D11Device* Device, Material* Resource, ID3D11InputLayout** InputLayout);
 public:
 	
-	void Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, 
+
+
+	void Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer , GBufferVariables* GBufferVars,
 		GBufferDescription& GBufferDescription, ID3D11DepthStencilView** DepthStencilView);
 
 	UINT GetSampleCount() const { return SampleCount; }
@@ -71,7 +75,6 @@ public:
 	static bool AllocConstantBuffer(ID3D11Device* Device, Geometry* Geometry);
 	static bool GenerateEffect(ID3D11Device* Device, Material* Resource);
 	static bool CompileShader(ID3D11Device* Device, Material* Resource);
-	
 
 	ID3D11Device* GetDevice() { return Device; }
 	ID3D11DeviceContext* GetContext() { return Context; }

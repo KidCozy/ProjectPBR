@@ -50,6 +50,7 @@ void Quad::OnInit()
 
 	Position = MaterialResource.GetEffect()->GetVariableByName("PositionBuffer")->AsShaderResource();
 	Normal = MaterialResource.GetEffect()->GetVariableByName("NormalBuffer")->AsShaderResource();
+	PixelOffset = MaterialResource.GetEffect()->GetVariableByName("PixelOffset")->AsVector();
 }
 
 void Quad::OnUpdate()

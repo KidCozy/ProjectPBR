@@ -27,9 +27,12 @@ private:
 	UINT Width;
 	UINT Height;
 
+
+
 	ID3D11RenderTargetView* MergeBuffer = nullptr;
 
 	RTTexture GBuffer[BUFFERCOUNT] = { nullptr };
+	GBufferVariables GBufferVar;
 	GBufferDescription GBufferDesc;
 	D3D11_TEXTURE2D_DESC RenderTargetDesc;
 
@@ -79,8 +82,10 @@ public:
 
 	ID3D11RenderTargetView* GetMergeBuffer() { return MergeBuffer; }
 	ID3D11RenderTargetView** GetMergeBufferPointer() { return &MergeBuffer; }
+
 	RTTexture* GetGBufferPointer() { return GBuffer; }
 	GBufferDescription* GetGBufferDescriptor() { return &GBufferDesc; }
+	GBufferVariables* GetGBufferVariables() { return &GBufferVar; }
 
 	_Out_ ID3D11RenderTargetView** GetRenderTargetViewPointer() { return &GBuffer[0].RTV; }
 	D3D11_TEXTURE2D_DESC* GetRenderTargetDesc() { return &GBufferDesc.RenderTargetDesc; }
@@ -95,7 +100,7 @@ public:
 		
 	D3D11_VIEWPORT* GetViewport() { return &MainViewport; }
 
-
+	XMVECTOR* GetPixelOffset() { return &GBufferVar.ViewportDimensions; }
 
 	RenderManager() {}
 	RenderManager(UINT InWidth, UINT InHeight, _In_ ID3D11Device* InDevice, _In_ ID3D11DeviceContext* InContext, UINT BufferCount);

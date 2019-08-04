@@ -4,10 +4,8 @@
 #include "stdafx.h"
 #include "ProjectPBR.h"
 #include "Engine.h"
-#define MAX_LOADSTRING 100
 
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
+#define MAX_LOADSTRING 100
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.

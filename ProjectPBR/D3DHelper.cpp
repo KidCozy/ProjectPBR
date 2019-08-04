@@ -220,7 +220,7 @@ bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, Material* Resource, ID
 	return true;
 }
 
-void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBufferDescription& GBufferDescription, ID3D11DepthStencilView** DepthStencilView)
+void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer,GBufferVariables* GBufferVars, GBufferDescription& GBufferDescription, ID3D11DepthStencilView** DepthStencilView)
 {
 	HRESULT hr;
 	ID3D11Texture2D* BackBuffer;
@@ -255,6 +255,8 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 
 	//Context->OMSetDepthStencilState(DepthStencilState, 0);
 
+	GBufferVars->ViewportDimensions = XMVectorSet(1.0f / WINDOW_WIDTH, 1.0f / WINDOW_HEIGHT, 1.0f, 1.0f);
+
 	BackBuffer->Release();
 
 
@@ -274,8 +276,6 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 		{
 			MessageBox(NULL, L"Failed to create render target view.", 0, 0);
 		}
-
-		GBuffer[i].Texture->Release();
 
 
 	}

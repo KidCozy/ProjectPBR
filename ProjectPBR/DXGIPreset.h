@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include<DirectXMath.h>
 
 #define BUFFERCOUNT 2
 #define ASPECT_RATIO 1.777f
@@ -9,11 +10,19 @@
 struct D3D11_RENDER_TARGET_VIEW_DESC;
 struct D3D11_DEPTH_STENCIL_VIEW_DESC;
 
+using namespace DirectX;
+
 struct RTTexture
 {
 	ID3D11Texture2D* Texture = NULL;
 	ID3D11RenderTargetView* RTV = NULL;
 	ID3D11ShaderResourceView* SRV = NULL;
+
+};
+
+struct GBufferVariables
+{
+	XMVECTOR ViewportDimensions;
 };
 
 struct GBufferDescription

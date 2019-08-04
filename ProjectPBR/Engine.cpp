@@ -76,7 +76,7 @@ void Engine::PostInitialize()
 	Helper.CreateRenderTargetView(Renderer.GetGBufferPointer(), Renderer.GetGBufferDescriptor());
 	//Helper.CreateDepthStencilView(&*Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
 	
-	Helper.Resize(Renderer.GetMergeBufferPointer(),Renderer.GetGBufferPointer(), *Renderer.GetGBufferDescriptor(),Renderer.GetDepthStencilViewPointer());
+	Helper.Resize(Renderer.GetMergeBufferPointer(),Renderer.GetGBufferPointer(), Renderer.GetGBufferVariables(), *Renderer.GetGBufferDescriptor(),Renderer.GetDepthStencilViewPointer());
 	//Helper.CreateDepthStencilView(Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
 
 
