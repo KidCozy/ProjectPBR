@@ -18,6 +18,15 @@ void Quad::OnInit()
 	Vertex v3{ {-1.0f, 1.0f, 0.0f}};
 	Vertex v4{ {1.0f, 1.0f, 0.0f}};
 
+	v1.UV = { 0.0f, 1.0f };
+	v2.UV = { 1.0f, 1.0f };
+	v3.UV = { 0.0f, 0.0f };
+	v4.UV = { 1.0f, 0.0f };
+
+	//v1.Normal = {0.0f,0.0f,-1.0f};
+	//v2.Normal = {0.0f,0.0f,-1.0f};
+	//v3.Normal = {0.0f,0.0f,-1.0f};
+	//v4.Normal = {0.0f,0.0f,-1.0f};
 
 	//Vertex v1{ {0.0f, 0.0f, 0.0f} };
 	//Vertex v2{ {1.0f, 0.0f, 0.0f} };

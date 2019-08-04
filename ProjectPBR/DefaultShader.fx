@@ -14,8 +14,7 @@ struct VSInput
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
-
-    //float2 UV : TEXCOORD0;
+    float2 UV : TEXCOORD0;
 };
 
 struct RTInput
@@ -57,6 +56,8 @@ RTInput VS(VSInput Input)
     Output.Normal = mul(Input.Normal, (float3x3) World);
     Output.Normal = normalize(Output.Normal);
 
+    Output.UV = Input.UV;
+
     return Output;
 }
 
@@ -79,7 +80,7 @@ PSInput RTWriter(RTInput Input)
 
     Output.Position = float4(Input.hPos.xyz, 1.0f);
     Output.Normal = float4(Input.Normal, 1.0f);
-
+    
     return Output;
 }
 
@@ -89,9 +90,8 @@ RTInput DeferredVS(VSInput Input)
 
     Output.hPos = float4(Input.Position, 1.0f);
     Output.Position = Output.hPos;
-   // Output.Position = normalize(Output.Position);
-  //  Output.Position = Output.hPos;
-   // Output.UV = Input.UV;
+    Output.Normal = Input.Normal;
+    Output.UV = Input.UV;
 
     return Output;
 }
@@ -99,10 +99,10 @@ RTInput DeferredVS(VSInput Input)
 PSFinal DeferredPS(RTInput Input)
 {
     PSFinal Output = (PSFinal)0;
-  //  float4 Color; // = PositionBuffer.Sample(SampleState, Input.UV);
- //   Output.Color = Color;
+    float3 Color = PositionBuffer.Sample(SampleState, Input.UV).rgb;
+    Output.Color = float4(Color, 1.0f);
     
-    Output.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+ //   Output.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
     return Output;
 }
@@ -116,22 +116,24 @@ float4 ForwardPS(ColorOutput Input) : SV_Target
 
 technique11 GeometryTech
 {
+    // G buffer Rendering
     pass P0
     {
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetPixelShader(CompileShader(ps_5_0, RTWriter()));
     }
 
+    // Merge buffer Rendering
     pass P1
     {
         SetVertexShader(CompileShader(vs_5_0, DeferredVS()));
         SetPixelShader(CompileShader(ps_5_0, DeferredPS()));
     }
 
+    // For debugging only (Don't use this pass for release)
     pass Forward0
     {
         SetVertexShader(CompileShader(vs_5_0, BasicVS()));
         SetPixelShader(CompileShader(ps_5_0, ForwardPS()));
-
     }
 };

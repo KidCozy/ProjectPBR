@@ -73,7 +73,7 @@ void Engine::PostInitialize()
 
 	GenerateDescriptors(Renderer.GetGBufferDescriptor());
 
-//	Helper.CreateRenderTargetView(Renderer.GetGBufferPointer(), Renderer.GetGBufferDescriptor());
+	Helper.CreateRenderTargetView(Renderer.GetGBufferPointer(), Renderer.GetGBufferDescriptor());
 	//Helper.CreateDepthStencilView(&*Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
 	
 	Helper.Resize(Renderer.GetMergeBufferPointer(),Renderer.GetGBufferPointer(), *Renderer.GetGBufferDescriptor(),Renderer.GetDepthStencilViewPointer());
@@ -104,6 +104,8 @@ void Engine::OnRender()
 	Renderer.Render();
 
 	SwapChain->Present(0, 0);
+//	Context->ClearState();
+
 }
 
 void Engine::OnRelease()

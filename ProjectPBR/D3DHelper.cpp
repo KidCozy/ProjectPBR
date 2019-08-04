@@ -52,7 +52,14 @@ bool D3DHelper::CreateDevice(ID3D11Device** OutDevice, ID3D11DeviceContext** Out
 
 	};
 
-	if (FAILED(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, nullptr, 0, D3D11_SDK_VERSION, &Device, &Levels[0], &Context))) {
+	UINT CreateDeviceFlags = 0;
+
+#if defined(DEBUG) || defined(_DEBUG)
+	CreateDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+
+	if (FAILED(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, CreateDeviceFlags, nullptr, 0, D3D11_SDK_VERSION, &Device, &Levels[0], &Context))) {
 		MessageBox(NULL, L"Failed to create D3D Device.", 0, 0);
 		exit(-1);
 	} 
@@ -246,30 +253,32 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer, GBuf
 
 	CreateDepthStencilView(DepthStencilView,&GBufferDescription.DepthStencilDesc, &GBufferDescription.DSVDesc);
 
-	Context->OMSetRenderTargets(1, &*Merger, &**DepthStencilView);
 	//Context->OMSetDepthStencilState(DepthStencilState, 0);
 
 	BackBuffer->Release();
 
 
-	//ReleaseGBuffer(GBuffer, *DepthStencilView);
+//	ReleaseGBuffer(GBuffer, *DepthStencilView);
 
-	//for (UINT i = 0; i < BUFFERCOUNT; i++)
-	//{
-	//	if (FAILED(Device->CreateTexture2D(&GBufferDescription.RenderTargetDesc, 0, &GBuffer[i].Texture)))
-	//	{
-	//		MessageBox(NULL, L"Failed to create texture", 0, 0);
-	//	}
-	//	if (FAILED(Device->CreateShaderResourceView(GBuffer[i].Texture, &GBufferDescription.SRVDesc, &GBuffer[i].SRV)))
-	//	{
-	//		MessageBox(NULL, L"Failed to create shader resource view.", 0, 0);
-	//	}
-	//	if (FAILED(Device->CreateRenderTargetView(GBuffer[i].Texture, &GBufferDescription.RTVDesc, &GBuffer[i].RTV)))
-	//	{
-	//		MessageBox(NULL, L"Failed to create render target view.", 0, 0);
-	//	}
+	for (UINT i = 0; i < BUFFERCOUNT; i++)
+	{
+		if (FAILED(Device->CreateTexture2D(&GBufferDescription.RenderTargetDesc, 0, &GBuffer[i].Texture)))
+		{
+			MessageBox(NULL, L"Failed to create texture", 0, 0);
+		}
+		if (FAILED(Device->CreateShaderResourceView(GBuffer[i].Texture, &GBufferDescription.SRVDesc, &GBuffer[i].SRV)))
+		{
+			MessageBox(NULL, L"Failed to create shader resource view.", 0, 0);
+		}
+		if (FAILED(Device->CreateRenderTargetView(GBuffer[i].Texture, &GBufferDescription.RTVDesc, &GBuffer[i].RTV)))
+		{
+			MessageBox(NULL, L"Failed to create render target view.", 0, 0);
+		}
 
-	//}
+		GBuffer[i].Texture->Release();
+
+
+	}
 
 
 
@@ -432,17 +441,26 @@ bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
 
 void D3DHelper::ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV)
 {
-	if (GBuffer[0].Texture == nullptr)
-		return;
 	
-	//DSV->Release();
-
+	DSV->Release();
 
 	for (UINT i = 0; i < BUFFERCOUNT; i++)
 	{
-		GBuffer[i].RTV->Release();
-		GBuffer[i].SRV->Release();
-		GBuffer[i].Texture->Release();
+		if (GBuffer[i].RTV != nullptr)
+		{
+			GBuffer[i].RTV->Release();
+		}
+
+		if (GBuffer[i].SRV != nullptr)
+		{
+			GBuffer[i].SRV->Release();
+		}
+
+		if (GBuffer[i].Texture != nullptr)
+		{
+			GBuffer[i].Texture->Release();
+
+		}
 	}
 
 }

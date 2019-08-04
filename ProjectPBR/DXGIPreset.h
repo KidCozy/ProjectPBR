@@ -11,9 +11,9 @@ struct D3D11_DEPTH_STENCIL_VIEW_DESC;
 
 struct RTTexture
 {
-	ID3D11Texture2D* Texture = nullptr;
-	ID3D11RenderTargetView* RTV = nullptr;
-	ID3D11ShaderResourceView* SRV = nullptr;
+	ID3D11Texture2D* Texture = NULL;
+	ID3D11RenderTargetView* RTV = NULL;
+	ID3D11ShaderResourceView* SRV = NULL;
 };
 
 struct GBufferDescription

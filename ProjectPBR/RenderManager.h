@@ -12,6 +12,13 @@
 
 #define DEFAULT_MATERIALSIZE 2
 
+enum RENDERBUFFER
+{
+	RENDERBUFFER_GEOMETRY,
+	RENDERBUFFER_MERGE,
+	RENDERBUFFER_DEBUG,
+};
+
 class RenderManager :
 	public VirtualObject
 {
@@ -46,6 +53,9 @@ private:
 	void SetInputElements();
 	void SetMaterialPath();
 
+	void SetPass(Geometry& Object, UINT Index);
+	void SetTechnique(ID3DX11EffectTechnique* TargetTech) { if (TargetTech != nullptr) SelectTech = TargetTech; }
+
 protected:
 
 	virtual void PostInitialize() override;
@@ -63,9 +73,9 @@ public:
 	void ClearScreen(XMVECTORF32 ClearColor);
 
 	void BindBuffer(Geometry* Geometry);
-	void SetTechnique(ID3DX11EffectTechnique* TargetTech) { if(TargetTech != nullptr) SelectTech = TargetTech; }
-	void DrawObject(Geometry* Object);
-	void SetPass(Geometry& Object, UINT Index);
+
+	void DrawObject(Geometry* Object, RENDERBUFFER RenderBuffer);
+
 
 	ID3D11RenderTargetView* GetMergeBuffer() { return MergeBuffer; }
 	ID3D11RenderTargetView** GetMergeBufferPointer() { return &MergeBuffer; }

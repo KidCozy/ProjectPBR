@@ -8,7 +8,7 @@ using namespace DirectX;
 struct Vertex {
 	DirectX::XMFLOAT3 Position;
 	DirectX::XMFLOAT3 Normal;
-//	DirectX::XMFLOAT2 UV;
+	DirectX::XMFLOAT2 UV;
 };
 
 struct BaseBuffer {

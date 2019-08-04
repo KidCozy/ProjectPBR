@@ -7,8 +7,8 @@ class Quad :
 {
 private:
 
-	ID3DX11EffectShaderResourceVariable* Position;
-	ID3DX11EffectShaderResourceVariable* Normal;
+	ID3DX11EffectShaderResourceVariable* Position = nullptr;
+	ID3DX11EffectShaderResourceVariable* Normal = nullptr;
 
 protected:
 
