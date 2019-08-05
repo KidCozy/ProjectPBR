@@ -74,17 +74,6 @@ bool Material::GenerateEffect(ID3D11Device* Device, LPCWSTR Path)
 	return true;
 }
 
-bool Material::AddTexture2DResource(ID3D11Device* Device, ID3D11Texture2D* Resource, D3D11_SHADER_RESOURCE_VIEW_DESC& SRVDesc)
-{
-
-	if (FAILED(Device->CreateShaderResourceView(Resource, &SRVDesc, &ShaderResources[ShaderResources.size()]))) {
-		MessageBox(NULL, L"Failed to create srv", 0, 0);
-		return false;
-	}
-
-	return true;
-}
-
 void Material::AddTextureResource(ID3D11ShaderResourceView * Texture)
 {
 	ShaderResources.push_back(Texture);

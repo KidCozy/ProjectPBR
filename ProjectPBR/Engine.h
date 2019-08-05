@@ -25,7 +25,7 @@ private:
 
 private:
 	void GenerateDescriptors(GBufferDescription* Descriptor);
-
+	void InitializeImGui();
 protected:
 
 	virtual void PostInitialize() override;

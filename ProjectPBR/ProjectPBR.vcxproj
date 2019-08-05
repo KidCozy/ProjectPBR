@@ -156,6 +156,14 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Geometrics.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="imgui\imgui_impl_win32.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Include\d3dx11effect.h" />
     <ClInclude Include="Include\d3dxGlobal.h" />
     <ClInclude Include="Material.h" />
@@ -178,6 +186,12 @@
     </None>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ProjectPBR.cpp" />
     <ClCompile Include="Quad.cpp" />

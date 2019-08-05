@@ -3,6 +3,12 @@
 #include<dxgi.h>
 #include<vector>
 #include<DirectXColors.h>
+
+#include"imgui/imgui.h"
+#include"imgui/imgui_impl_win32.h"
+#include"imgui/imgui_impl_dx11.h"
+
+
 #include"DXGIPreset.h"
 #include"VirtualObject.h"
 #include"D3DHelper.h"
@@ -19,6 +25,11 @@ enum RENDERBUFFER
 	RENDERBUFFER_DEBUG,
 };
 
+struct ImGuiVariables
+{
+	static int Radio_BufferVisualization;
+};
+
 class RenderManager :
 	public VirtualObject
 {
@@ -28,12 +39,15 @@ private:
 	UINT Height;
 
 
-
+	ID3D11RenderTargetView* SettingRenderTargets[BUFFERCOUNT];
 	ID3D11RenderTargetView* MergeBuffer = nullptr;
 
 	RTTexture GBuffer[BUFFERCOUNT] = { nullptr };
 	GBufferVariables GBufferVar;
 	GBufferDescription GBufferDesc;
+
+	ImGuiVariables ImGuiVar;
+
 	D3D11_TEXTURE2D_DESC RenderTargetDesc;
 
 	ID3D11DepthStencilView* DepthStencilView = nullptr;
@@ -69,6 +83,9 @@ protected:
 	virtual void OnRelease() override;
 
 public:
+
+	void RenderImGui();
+	void InitImGui();
 
 	void SetWidth(UINT NewWidth) { Width = NewWidth; }
 	void SetHeight(UINT NewHeight) { Height = NewHeight; }

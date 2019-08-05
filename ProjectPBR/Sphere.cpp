@@ -29,7 +29,11 @@ void Sphere::OnInit()
 			v.Position.z = Radius * sinf(phi)*sinf(theta);
 
 			XMVECTOR p = XMLoadFloat3(&v.Position);
+			XMVECTOR b;
+			
 			XMStoreFloat3(&v.Normal, XMVector3Normalize(p));
+			XMStoreFloat3(&v.Binormal, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&v.Normal), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f))));
+			XMStoreFloat3(&v.Tangent, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&v.Binormal), XMLoadFloat3(&v.Normal))));
 
 			Vertices.push_back(v);
 		}

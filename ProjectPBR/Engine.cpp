@@ -61,6 +61,16 @@ void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 
 }
 
+void Engine::InitializeImGui()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui_ImplWin32_Init(MainWindow);
+	ImGui_ImplDX11_Init(Device, Context);
+	ImGui::StyleColorsDark();
+}
+
 
 
 void Engine::PostInitialize()
@@ -77,8 +87,8 @@ void Engine::PostInitialize()
 	//Helper.CreateDepthStencilView(&*Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
 	
 	Helper.Resize(Renderer.GetMergeBufferPointer(),Renderer.GetGBufferPointer(), Renderer.GetGBufferVariables(), *Renderer.GetGBufferDescriptor(),Renderer.GetDepthStencilViewPointer());
-	//Helper.CreateDepthStencilView(Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
-
+	
+	InitializeImGui();
 
 
 }
@@ -103,7 +113,7 @@ void Engine::OnRender()
 
 	Renderer.Render();
 
-	SwapChain->Present(0, 0);
+	SwapChain->Present(1, 0);
 //	Context->ClearState();
 
 }

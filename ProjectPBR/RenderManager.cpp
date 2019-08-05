@@ -36,12 +36,7 @@ void RenderManager::DrawObject(Geometry * Object, RENDERBUFFER RenderBuffer)
 	{
 	case RENDERBUFFER_GEOMETRY:
 	{
-		static ID3D11RenderTargetView* RenderTargets[]
-		{
-			GBuffer[0].RTV,
-			GBuffer[1].RTV,
-		};
-		Context->OMSetRenderTargets(BUFFERCOUNT, RenderTargets, DepthStencilView);
+		Context->OMSetRenderTargets(BUFFERCOUNT, SettingRenderTargets, DepthStencilView);
 		break;
 	}
 
@@ -61,6 +56,7 @@ void RenderManager::DrawObject(Geometry * Object, RENDERBUFFER RenderBuffer)
 
 	BindBuffer(Object);
 
+	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	Context->IASetInputLayout(Object->GetMaterial()->GetInputLayout());
 	Context->DrawIndexed(Object->GetIndexCount(), 0, 0);
 	Context->OMSetRenderTargets(_countof(NullRTV), NullRTV, nullptr);
@@ -95,10 +91,11 @@ void RenderManager::PostInitialize()
 
 void RenderManager::ClearScreen(XMVECTORF32 ClearColor)
 {
+	Context->ClearRenderTargetView(MergeBuffer, ClearColor);
 	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-//	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	Context->ClearRenderTargetView(GBuffer[0].RTV, ClearColor);
-	Context->ClearRenderTargetView(GBuffer[1].RTV, ClearColor);
+
+	for (UINT i = 0; i < BUFFERCOUNT; i++)
+		Context->ClearRenderTargetView(GBuffer[i].RTV, ClearColor);
 }
 
 void RenderManager::OnInit()
@@ -114,10 +111,14 @@ void RenderManager::OnInit()
 
 	D3DHelper::AllocConstantBuffer(Device, &StaticSphere);
 	D3DHelper::AllocConstantBuffer(Device, &ScreenQuad);
-
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
+	// Initialize for OMSetRenderTargets method.
+	for (UINT i = 0; i < BUFFERCOUNT; i++)
+		SettingRenderTargets[i] = GBuffer[i].RTV;
 	
 	World = XMMatrixIdentity();
+
+
 
 
 }
@@ -144,9 +145,13 @@ void RenderManager::OnRender()
 
 	ScreenQuad.SetPosition(GBuffer[0].SRV);
 	ScreenQuad.SetNormal(GBuffer[1].SRV);
+	ScreenQuad.SetBinormal(GBuffer[2].SRV);
+	ScreenQuad.SetTangent(GBuffer[3].SRV);
 	ScreenQuad.SetPixelOffset(&GBufferVar.ViewportDimensions);
 
 	DrawObject(&ScreenQuad, RENDERBUFFER_MERGE);
+
+	RenderImGui();
 
 }
 
@@ -159,4 +164,34 @@ void RenderManager::OnRelease()
 	DepthStencilView->Release();
 	D3DHelper::ReleaseGBuffer(GBuffer, DepthStencilView);
 
+}
+
+void RenderManager::RenderImGui()
+{
+
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+	{
+		ImGui::Begin("Menu");
+		ImGui::Text("Buffer Visualization");
+		ImGui::BeginGroup();
+		ImGui::RadioButton("Normal", &Radio_BufferVisualization, 0); ImGui::SameLine();
+		ImGui::RadioButton("Binormal", &Radio_BufferVisualization, 1); ImGui::SameLine();
+		ImGui::RadioButton("Tangent", &Radio_BufferVisualization, 2);
+		ImGui::EndGroup();
+		ImGui::End();
+	}
+
+
+	ImGui::EndFrame();
+	ImGui::Render();
+	Context->OMSetRenderTargets(1, &MergeBuffer, nullptr);
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+}
+
+void RenderManager::InitImGui()
+{
+	ImGuiVar.Radio_BufferVisualization = 0;
 }

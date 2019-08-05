@@ -45,7 +45,6 @@ protected:
 public:
 	bool CompileShader(ID3D11DeviceContext* Context, ID3D11Device* Device, std::vector<D3D11_INPUT_ELEMENT_DESC> InputLayoutDesc, LPCWSTR Path);
 	bool GenerateEffect(ID3D11Device* Device, LPCWSTR Path);
-	bool AddTexture2DResource(ID3D11Device* Device, ID3D11Texture2D* Resource, D3D11_SHADER_RESOURCE_VIEW_DESC& SRVDesc);
 
 	void SetFile(LPCWSTR NewPath) { Path = NewPath; }
 	void SetInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC>& InputLayout) { InputLayoutDesc = &InputLayout; }
