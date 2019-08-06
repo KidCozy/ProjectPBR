@@ -5,12 +5,12 @@ This project is related with 3D graphics api such as DirectX. Researching and de
 
 To-do
 
- - [ ] Primitive Rendering (No graphical features such as lighting, post processing)
+ - [x] Primitive Rendering (No graphical features such as lighting, post processing)
 	 - [x] Sphere rendering
-	 - [ ] Quad rendering
- - [ ] Basic Rendering
-	 - [ ] Lighting (Based on Phong)
-	 - [ ] Post processing (Screen quad)
+	 - [x] Quad rendering
+ - [x] Basic Rendering
+	 - [x] Lighting (Based on Phong)
+	 - [x] Post processing (Screen quad)
  - [ ] Adavanced Rendering (Include PBR)
 	 - [ ] Microfacet model
 	 - [ ] More post processing (Color Aberration)
