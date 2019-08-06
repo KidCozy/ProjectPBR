@@ -6,11 +6,12 @@
 using namespace DirectX;
 
 struct Vertex {
-	DirectX::XMFLOAT3 Position;
-	DirectX::XMFLOAT3 Normal;
-	DirectX::XMFLOAT3 Binormal;
-	DirectX::XMFLOAT3 Tangent;
-	DirectX::XMFLOAT2 UV;
+	DirectX::XMFLOAT3 Position{};
+	DirectX::XMFLOAT3 Normal{};
+	DirectX::XMFLOAT3 Binormal{};
+	DirectX::XMFLOAT3 Tangent{};
+	DirectX::XMFLOAT2 UV{};
+	DirectX::XMFLOAT4 Color{};
 };
 
 struct BaseBuffer {

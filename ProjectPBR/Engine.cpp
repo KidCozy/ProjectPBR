@@ -17,8 +17,8 @@ void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 
 	D3D11_TEXTURE2D_DESC* DepthStencilDesc = Renderer.GetDepthStencilDesc();
 	DepthStencilDesc->ArraySize = 1;
-	DepthStencilDesc->BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	DepthStencilDesc->Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	DepthStencilDesc->BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	DepthStencilDesc->Format = DXGI_FORMAT_R24G8_TYPELESS;
 	DepthStencilDesc->Height = Height;
 	DepthStencilDesc->Width = Width;
 	DepthStencilDesc->MipLevels = 1;
@@ -30,6 +30,12 @@ void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 	ShaderResourceViewDesc->Format = Renderer.GetGBufferDescriptor()->RenderTargetDesc.Format;
 	ShaderResourceViewDesc->ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	ShaderResourceViewDesc->Texture2D.MipLevels = 1;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC* DepthShaderResourceViewDesc = &Renderer.GetGBufferDescriptor()->DepthSRVDesc;
+	DepthShaderResourceViewDesc->Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	DepthShaderResourceViewDesc->ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	DepthShaderResourceViewDesc->Texture2D.MipLevels = 1;
+//	DepthShaderResourceViewDesc->Texture2D.MostDetailedMip = 0;
 
 	D3D11_RENDER_TARGET_VIEW_DESC* RenderTargetViewDesc = Renderer.GetRenderTargetViewDesc();
 	RenderTargetViewDesc->Format = Renderer.GetGBufferDescriptor()->RenderTargetDesc.Format;
@@ -58,7 +64,6 @@ void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 	DepthStencilInfoDesc->BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
 
-
 }
 
 void Engine::InitializeImGui()
@@ -75,7 +80,7 @@ void Engine::InitializeImGui()
 
 void Engine::PostInitialize()
 {
-
+	AllocConsole();
 
 	Helper.CreateDevice(&Device, &Context);
 	Helper.CreateDXGI(&MainWindow, Factory, Width, Height, &SwapChain, Renderer.GetViewport(), Renderer.GetGBufferDescriptor());

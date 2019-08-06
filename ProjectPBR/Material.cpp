@@ -23,15 +23,6 @@ bool Material::CompileShader(ID3D11DeviceContext* Context, ID3D11Device* Device,
 	if (FAILED(hr))
 		MessageBox(NULL, L"Failed to compile pixel shader", 0, 0);
 
-	if (FAILED(Device->CreateVertexShader(VertexBlob->GetBufferPointer(), VertexBlob->GetBufferSize(), NULL, &VS))) 
-	{
-		MessageBox(NULL, L"Failed to create vertex shader", 0, 0);
-	}
-	if(FAILED(Device->CreatePixelShader(PixelBlob->GetBufferPointer(), PixelBlob->GetBufferSize(), NULL, &PS)))
-	{
-		MessageBox(NULL, L"Failed to create pixel shader", 0, 0);
-	}
-
 	if(FAILED(GenerateEffect(Device, Path)))
 	{
 		MessageBox(NULL, L"Failed to generate effect", 0, 0);

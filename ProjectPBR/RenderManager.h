@@ -23,11 +23,13 @@ enum RENDERBUFFER
 	RENDERBUFFER_GEOMETRY,
 	RENDERBUFFER_MERGE,
 	RENDERBUFFER_DEBUG,
+	RENDERBUFFER_LINE,
 };
 
 struct ImGuiVariables
 {
-	static int Radio_BufferVisualization;
+	int Radio_Technique;
+	int Radio_BufferVisualization;
 };
 
 class RenderManager :
@@ -67,10 +69,9 @@ public:
 	XMMATRIX World;
 
 private:
-	void SetInputElements();
 	void SetMaterialPath();
 
-	void SetPass(Geometry& Object, UINT Index);
+	void SetPass(Geometry& Object,TECHNIQUES Technique, UINT Index);
 	void SetTechnique(ID3DX11EffectTechnique* TargetTech) { if (TargetTech != nullptr) SelectTech = TargetTech; }
 
 protected:
@@ -94,8 +95,9 @@ public:
 
 	void BindBuffer(Geometry* Geometry);
 
-	void DrawObject(Geometry* Object, RENDERBUFFER RenderBuffer);
-
+	void DrawObject(Geometry* Object, TECHNIQUES Technique, RENDERBUFFER RenderBuffer);
+	void DrawObject(Geometry* Object);
+	void DrawDebugLine(Geometry * Object, UINT Index);
 
 	ID3D11RenderTargetView* GetMergeBuffer() { return MergeBuffer; }
 	ID3D11RenderTargetView** GetMergeBufferPointer() { return &MergeBuffer; }

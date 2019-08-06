@@ -28,18 +28,69 @@ void Sphere::OnInit()
 			v.Position.y = Radius * cosf(phi);
 			v.Position.z = Radius * sinf(phi)*sinf(theta);
 
+			v.Tangent.x = -Radius * sinf(phi)*sinf(theta);
+			v.Tangent.y = 0.0f;
+			v.Tangent.z = +Radius * sinf(phi)*cosf(theta);
+
 			XMVECTOR p = XMLoadFloat3(&v.Position);
 			XMVECTOR b;
 			
+			//
+			//XMStoreFloat3(&v.Binormal, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&v.Normal), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f))));
+			//XMStoreFloat3(&v.Tangent, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&v.Binormal), XMLoadFloat3(&v.Normal))));
+
 			XMStoreFloat3(&v.Normal, XMVector3Normalize(p));
-			XMStoreFloat3(&v.Binormal, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&v.Normal), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f))));
-			XMStoreFloat3(&v.Tangent, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&v.Binormal), XMLoadFloat3(&v.Normal))));
+			XMStoreFloat3(&v.Binormal, XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f));
 
 			Vertices.push_back(v);
 		}
 	}
 
 	Vertices.push_back(bottomVertex);
+
+	const int s = Vertices.size() * 2;
+
+	DebugLine[0].LineVertices.resize(s);
+	DebugLine[0].LineIndices.resize(s);
+	DebugLine[1].LineVertices.resize(s);
+	DebugLine[1].LineIndices.resize(s);
+	DebugLine[2].LineVertices.resize(s);
+	DebugLine[2].LineIndices.resize(s);
+
+	for (int i = 0, j=0; i < s; i += 2, j++)
+	{
+		
+		Vertex n;
+		XMVECTOR XMNormalVector, XMTangentVector;
+		n = Vertices[j];
+
+		DebugLine[0].LineVertices[i] = n;
+		DebugLine[0].LineVertices[i + 1] = n;
+
+		DebugLine[1].LineVertices[i] = n;
+		DebugLine[1].LineVertices[i + 1] = n;
+
+		XMNormalVector = XMLoadFloat3(&DebugLine[0].LineVertices[i + 1].Position);
+		XMNormalVector *= 1.1f;
+
+		XMTangentVector = XMLoadFloat3(&DebugLine[1].LineVertices[i + 1].Tangent);
+		XMTangentVector *= 1.1f;
+
+		XMStoreFloat3(&DebugLine[0].LineVertices[i + 1].Position, XMNormalVector);
+		XMStoreFloat3(&DebugLine[1].LineVertices[i + 1].Position, XMTangentVector);
+
+		DebugLine[0].LineIndices[i] = i;
+		DebugLine[0].LineIndices[i + 1] = i + 1;
+
+		DebugLine[1].LineIndices[i] = i;
+		DebugLine[1].LineIndices[i + 1] = i + 1;
+
+		XMStoreFloat4(&DebugLine[0].LineVertices[i].Color, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+		XMStoreFloat4(&DebugLine[0].LineVertices[i+1].Color, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+		XMStoreFloat4(&DebugLine[1].LineVertices[i].Color, XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f));
+		XMStoreFloat4(&DebugLine[1].LineVertices[i+1].Color, XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f));
+		//XMStoreFloat3(&DebugLine[0].LineVertices[i].Color, XMVectorSet(0.0f, 1.0f, 0.0f));
+	}
 
 	for (UINT i = 1; i <= Slice; ++i)
 	{

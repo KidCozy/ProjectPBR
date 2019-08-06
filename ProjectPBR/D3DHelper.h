@@ -48,7 +48,7 @@ private:
 	static bool GetMSAAFeature(ID3D11Device* Device, GBufferDescription* Descriptor);
 	void SetSampleCount(UINT Count) { SampleCount = Count; }
 
-	static bool GenerateInputLayout(ID3D11Device* Device, Material* Resource, ID3D11InputLayout** InputLayout);
+	static bool GenerateInputLayout(ID3D11Device* Device, LPCSTR Function, Material* Resource, ID3D11InputLayout** InputLayout);
 public:
 	
 
@@ -70,9 +70,10 @@ public:
 	bool CreateDepthStencil(_Out_ ID3D11Texture2D** DepthStencil, _In_ D3D11_TEXTURE2D_DESC* DepthStencilDesc);
 
 	bool CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GbufferDescriptor);
-	bool CreateDepthStencilView(_Out_ ID3D11DepthStencilView** DepthStencilView, D3D11_TEXTURE2D_DESC* DepthStencilDesc, _In_ D3D11_DEPTH_STENCIL_VIEW_DESC* DepthStencilViewDesc);
+	bool CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilView, RTTexture* GBuffer, GBufferDescription* GBufferDesc);
 
 	static bool AllocConstantBuffer(ID3D11Device* Device, Geometry* Geometry);
+	static bool AllocDebugLineBuffer(ID3D11Device * Device, Geometry * Geometry, UINT Index);
 	static bool GenerateEffect(ID3D11Device* Device, Material* Resource);
 	static bool CompileShader(ID3D11Device* Device, Material* Resource);
 
