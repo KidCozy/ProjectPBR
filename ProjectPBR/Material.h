@@ -5,9 +5,13 @@
 #include<D3DX11.h>
 #include<D3Dcompiler.h>
 #include<vector>
+#include<map>
 #include<d3dx11effect.h>
 
 #include"Geometrics.h"
+#include"TextureResource.h"
+
+#define RELATIVE_ROOT L"C:\\Users\\pencu\\Desktop\\Personal\\Projects\\ProjectPBR\\x64\\Debug\\"
 
 enum TECHNIQUES
 {
@@ -34,23 +38,27 @@ protected:
 	ID3DX11EffectPass* CurrentPass;
 
 	std::vector<ID3D11InputLayout*> InputLayouts;
-	std::vector<ID3D11ShaderResourceView*> ShaderResources;
-	std::vector<ID3DX11EffectVectorVariable*> VectorVariables;
-	std::vector<ID3DX11EffectVariable*> Variables;
+	
 	std::vector<ID3DX11EffectPass*> Passes;
 	std::vector<D3D11_INPUT_ELEMENT_DESC>* InputLayoutDesc;
 
-	std::vector<ID3DX11EffectShaderResourceVariable*> MaterialShaderResources;
+	std::map<std::string, TextureResource*> Textures;
+	std::map<std::string, ID3DX11EffectVariable*> ShaderVariables;
+	std::vector<ID3D11ShaderResourceView*> ShaderResources;
 
 	LPCWSTR Path = L"DefaultShader.fx";
 
 public:
+
+	static ID3D11ShaderResourceView* LoadTexture(ID3D11Device* Device, LPCWSTR Path);
+	static ID3D11ShaderResourceView* LoadEnvironmentTexture(ID3D11Device* Device, LPCWSTR Path);
+
 	bool CompileShader(ID3D11DeviceContext* Context, ID3D11Device* Device, std::vector<D3D11_INPUT_ELEMENT_DESC> InputLayoutDesc, LPCWSTR Path);
 	bool GenerateEffect(ID3D11Device* Device, LPCWSTR Path);
 
 	void SetFile(LPCWSTR NewPath) { Path = NewPath; }
 	void SetInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC>& InputLayout) { InputLayoutDesc = &InputLayout; }
-	
+
 	void SetWorldMatrix(const XMMATRIX& Mat) { WorldMatrix->SetMatrix((float*)&Mat); }
 	void SetViewMatrix(const XMMATRIX& Mat) { ViewMatrix->SetMatrix((float*)&Mat); }
 	void SetProjectionMatrix(const XMMATRIX& Mat) { ProjectionMatrix->SetMatrix((float*)&Mat); }
@@ -62,7 +70,8 @@ public:
 	void SetTechnique(TECHNIQUES InTechnique) { Technique = Shader->GetTechniqueByIndex(InTechnique); }
 
 	HRESULT SetPass(UINT Index) {
-		if (Technique->GetPassByIndex(Index) == nullptr) return E_FAIL; CurrentPass = Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index); return S_OK; }
+		if (Technique->GetPassByIndex(Index) == nullptr) return E_FAIL; CurrentPass = Shader->GetTechniqueByName("GeometryTech")->GetPassByIndex(Index); return S_OK;
+	}
 
 	ConstantBuffer* GetConstBuffer() { return &ConstBuffer; }
 	ID3DX11Effect** GetEffectPointer() { return &Shader; }
@@ -70,6 +79,8 @@ public:
 
 	ID3D11InputLayout*& GetInputLayout(UINT Index) { return InputLayouts[Index]; }
 
+	std::map<std::string, ID3DX11EffectVariable*>& GetShaderVariables() { return ShaderVariables; }
+	std::map<std::string, TextureResource*>& GetTextures() { return Textures; }
 
 	std::vector<ID3D11InputLayout*>* GetInputLayouts() { return &InputLayouts; }
 	std::vector<D3D11_INPUT_ELEMENT_DESC>* GetInputLayoutVector() { return InputLayoutDesc; }
@@ -83,7 +94,7 @@ public:
 
 	void SetShaderResourceView(ID3DX11EffectShaderResourceVariable* Object, ID3D11ShaderResourceView* InSRV) { if(InSRV!=nullptr) Object->SetResource(InSRV); }
 
-	void AddTextureResource(ID3D11ShaderResourceView* Texture);
+	void AddTextureResource(TextureResource * Texture);
 
 
 	LPCWSTR GetPath() { return Path; }

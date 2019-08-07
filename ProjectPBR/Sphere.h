@@ -1,20 +1,22 @@
 #pragma once
 #include "ConstantGeometry.h"
 #include "VirtualObject.h"
+
 class Sphere :
 	public ConstantGeometry, public VirtualObject
 {
-private:
+protected:
 	float Radius;
 	UINT Slice;
 	UINT Stack;
 
-private:
+
+
+protected:
 	_inline void SetRadius(float InRadius) { Radius = InRadius; }
 	_inline void SetSlice(float InSlice) { Slice = InSlice; }
 	_inline void SetStack(float InStack) { Stack = InStack; }
 
-protected:
 	virtual void OnInit();
 	virtual void OnUpdate();
 	virtual void OnRender();

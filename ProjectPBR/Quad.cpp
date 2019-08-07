@@ -54,6 +54,7 @@ void Quad::OnInit()
 	Tangent = MaterialResource.GetEffect()->GetVariableByName("TangentBuffer")->AsShaderResource();
 	Depth = MaterialResource.GetEffect()->GetVariableByName("DepthBuffer")->AsShaderResource();
 	Color = MaterialResource.GetEffect()->GetVariableByName("ColorBuffer")->AsShaderResource();
+	Albedo = MaterialResource.GetEffect()->GetVariableByName("AlbedoBuffer")->AsShaderResource();
 
 	PixelOffset = MaterialResource.GetEffect()->GetVariableByName("PixelOffset")->AsVector();
 }

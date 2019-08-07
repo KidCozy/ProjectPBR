@@ -13,6 +13,7 @@ private:
 	ID3DX11EffectShaderResourceVariable* Tangent = nullptr;
 	ID3DX11EffectShaderResourceVariable* Depth = nullptr;
 	ID3DX11EffectShaderResourceVariable* Color = nullptr;
+	ID3DX11EffectShaderResourceVariable* Albedo = nullptr;
 
 	ID3DX11EffectVectorVariable* PixelOffset = nullptr;
 protected:
@@ -30,6 +31,7 @@ public:
 	void SetTangent(ID3D11ShaderResourceView* InTangent) { Tangent->SetResource(InTangent); }
 	void SetDepth(ID3D11ShaderResourceView* InDepth) { Depth->SetResource(InDepth); }
 	void SetColor(ID3D11ShaderResourceView* InColor) { Color->SetResource(InColor); }
+	void SetAlbedo(ID3D11ShaderResourceView* InAlbedo) { Albedo->SetResource(InAlbedo); }
 
 	void SetPixelOffset(XMVECTOR* Offset) { PixelOffset->SetFloatVector(Offset->m128_f32); }
 	Quad();

@@ -18,6 +18,7 @@
 
 #define DEFAULT_MATERIALSIZE 2
 
+
 enum RENDERBUFFER
 {
 	RENDERBUFFER_GEOMETRY,
@@ -30,6 +31,7 @@ struct ImGuiVariables
 {
 	int Radio_Technique;
 	int Radio_BufferVisualization;
+	bool Radio_DebugLine;
 };
 
 class RenderManager :
@@ -40,6 +42,8 @@ private:
 	UINT Width;
 	UINT Height;
 
+	ID3DX11EffectShaderResourceVariable* sr;
+	ID3D11ShaderResourceView* v;
 
 	ID3D11RenderTargetView* SettingRenderTargets[BUFFERCOUNT];
 	ID3D11RenderTargetView* MergeBuffer = nullptr;
@@ -63,6 +67,7 @@ private:
 
 public:
 	Sphere StaticSphere;
+	Sphere Skybox;
 	Quad ScreenQuad;
 	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
 

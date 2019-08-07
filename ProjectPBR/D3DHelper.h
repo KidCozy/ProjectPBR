@@ -82,6 +82,8 @@ public:
 
 	static void ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV);
 
+
+
 	D3DHelper() {}
 	D3DHelper(ID3D11Device* NewDevice, ID3D11DeviceContext* NewContext,IDXGISwapChain* NewSwapChain, UINT InWidth, UINT InHeight) : 
 		Device(NewDevice), Context(NewContext), SwapChain(NewSwapChain), Width(InWidth), Height(InHeight){}

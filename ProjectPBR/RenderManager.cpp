@@ -132,6 +132,12 @@ void RenderManager::ClearScreen(XMVECTORF32 ClearColor)
 
 void RenderManager::OnInit()
 {
+	Skybox.SetMaterial(MaterialContainer.data()[0]);
+	Skybox.SetProperty(10.0f, 64, 64);
+	Skybox.Init();
+
+	Skybox.AddEnvironmentTexture(Device, L"Resources/Textures/Skybox_beach.dds");
+
 	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
 	StaticSphere.SetProperty(1.0f, 32, 32);
 	StaticSphere.Init();
@@ -141,6 +147,7 @@ void RenderManager::OnInit()
 
 	D3DHelper::AllocConstantBuffer(Device, &StaticSphere);
 	D3DHelper::AllocConstantBuffer(Device, &ScreenQuad);
+	D3DHelper::AllocConstantBuffer(Device, &Skybox);
 	
 	D3DHelper::AllocDebugLineBuffer(Device, &StaticSphere, 0);
 	D3DHelper::AllocDebugLineBuffer(Device, &StaticSphere, 1);
@@ -151,6 +158,12 @@ void RenderManager::OnInit()
 
 	ImGuiVar.Radio_BufferVisualization = 0;
 	ImGuiVar.Radio_Technique = 0;
+	ImGuiVar.Radio_DebugLine = false;
+
+	v = Skybox.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView();
+	sr = Skybox.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource();
+
+
 
 }
 
@@ -171,7 +184,17 @@ void RenderManager::OnUpdate()
 void RenderManager::OnRender()
 {
 	DrawObject(&StaticSphere);
-	DrawDebugLine(&StaticSphere,0);
+	if(ImGuiVar.Radio_DebugLine)
+		DrawDebugLine(&StaticSphere,0);
+	DrawObject(&Skybox);
+
+
+
+	if (FAILED(sr->SetResource(Skybox.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView())))
+	{
+		MessageBox(NULL, L"Failed to set cubeslot resource.", 0, 0);
+	}
+
 //	DrawDebugLine(&StaticSphere,1);
 	//DrawDebugLine(&StaticSphere,2);
 
@@ -181,12 +204,13 @@ void RenderManager::OnRender()
 	ScreenQuad.SetBinormal(GBuffer[2].SRV);
 	ScreenQuad.SetTangent(GBuffer[3].SRV);
 	ScreenQuad.SetColor(GBuffer[4].SRV);
+	ScreenQuad.SetAlbedo(GBuffer[5].SRV);
 	ScreenQuad.SetDepth(GBuffer[BUFFERCOUNT - 1].SRV);
 
 
 	ScreenQuad.SetPixelOffset(&GBufferVar.ViewportDimensions);
 	DrawObject(&ScreenQuad,(TECHNIQUES)(ImGuiVar.Radio_Technique), (RENDERBUFFER)(ImGuiVar.Radio_BufferVisualization));
-
+	
 
 	RenderImGui();
 
@@ -228,6 +252,7 @@ void RenderManager::RenderImGui()
 			ImGui::RadioButton("Depth", &ImGuiVar.Radio_BufferVisualization, 3);
 			break;
 		}
+		ImGui::Checkbox("Normal Debug Line", &ImGuiVar.Radio_DebugLine);
 
 		ImGui::EndGroup();
 		ImGui::End();

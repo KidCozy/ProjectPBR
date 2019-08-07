@@ -2,6 +2,66 @@
 #include "Material.h"
 
 
+ID3D11ShaderResourceView* Material::LoadTexture(ID3D11Device * Device, LPCWSTR Path)
+{
+	ID3D11ShaderResourceView* SRV;
+	HRESULT hr;
+	D3DX11CreateShaderResourceViewFromFile(Device, Path, NULL, NULL, &SRV, &hr);
+
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to load texture.", 0, 0);
+	}
+
+	return SRV;
+}
+
+ID3D11ShaderResourceView * Material::LoadEnvironmentTexture(ID3D11Device * Device, LPCWSTR Path)
+{
+	ID3D11ShaderResourceView* SRV;
+	HRESULT hr;
+
+	ID3D11Texture2D* Tex = nullptr;
+
+	D3DX11_IMAGE_LOAD_INFO Info{};
+
+	Info.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+	D3DX11CreateTextureFromFile(Device, Path, &Info, NULL, (ID3D11Resource**)&Tex,&hr);
+
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to load texture (file).", 0, 0);
+	}
+
+	D3D11_TEXTURE2D_DESC TexDesc{};
+	Tex->GetDesc(&TexDesc);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
+	SRVDesc.Format = TexDesc.Format;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	SRVDesc.TextureCube.MipLevels = TexDesc.MipLevels;
+	SRVDesc.TextureCube.MostDetailedMip = 0;
+
+
+	hr = Device->CreateShaderResourceView(Tex, &SRVDesc, &SRV);
+
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, L"Failed to load texture (srv).", 0, 0);
+	}
+
+	//D3DX11CreateShaderResourceViewFromFile(Device, Path, NULL, NULL, &SRV, &hr);
+
+	//if (FAILED(hr))
+	//{
+	//	MessageBox(NULL, L"Failed to load texture.", 0, 0);
+	//}
+
+	return SRV;
+}
+
+
 bool Material::CompileShader(ID3D11DeviceContext* Context, ID3D11Device* Device,std::vector<D3D11_INPUT_ELEMENT_DESC> InputLayoutDesc, LPCWSTR Path)
 {
 
@@ -65,9 +125,31 @@ bool Material::GenerateEffect(ID3D11Device* Device, LPCWSTR Path)
 	return true;
 }
 
-void Material::AddTextureResource(ID3D11ShaderResourceView * Texture)
+void Material::AddTextureResource(TextureResource * Texture)
 {
-	ShaderResources.push_back(Texture);
+	std::wstring str = Texture->GetPath();
+	std::string path;
+	std::wstring FileName;
+
+	int t;
+
+	for (UINT i = 0; i < str.size(); i++)
+	{
+		if (str[i] == L'\\' || str[i] == L'/')
+		{
+			t = i;
+		}
+	}
+
+	for (UINT i = t + 1; i < str.size(); i++)
+	{
+		FileName.push_back(str[i]);
+	}
+
+	path.assign(FileName.begin(), FileName.end());
+//	Textures->SetFileName(FileName.c_str());
+
+	Textures.insert_or_assign(path, Texture);
 }
 
 Material::~Material()

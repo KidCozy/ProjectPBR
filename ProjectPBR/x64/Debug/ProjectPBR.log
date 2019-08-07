@@ -1,10 +1,2 @@
-﻿  ConstantGeometry.cpp
-  D3DHelper.cpp
-  Engine.cpp
-  Geometry.cpp
-  ProjectPBR.cpp
-  Quad.cpp
-  RenderManager.cpp
-  Sphere.cpp
-  코드를 생성하고 있습니다...
+﻿  D3DHelper.cpp
   ProjectPBR.vcxproj -> C:\Users\pencu\Desktop\Personal\Projects\ProjectPBR\x64\Debug\ProjectPBR.exe

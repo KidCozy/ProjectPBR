@@ -28,6 +28,9 @@ protected:
 
 public:
 
+	void AddTexture(ID3D11Device* Device, LPCWSTR Path);
+	void AddEnvironmentTexture(ID3D11Device* Device, LPCWSTR Path);
+
 	void SetMaterial(Material* NewMaterial) { MaterialResource = *NewMaterial; }
 
 	Material* GetMaterial() { return &MaterialResource; }

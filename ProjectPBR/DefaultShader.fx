@@ -6,6 +6,9 @@ Texture2D BinormalBuffer;
 Texture2D TangentBuffer;
 Texture2D DepthBuffer;
 Texture2D ColorBuffer;
+Texture2D AlbedoBuffer;
+
+TextureCube CubeSlot;
 
 float2 PixelOffset;
 
@@ -35,6 +38,7 @@ struct RTInput
     float3 Tangent : TEXCOORD2;
     float2 UV : TEXCOORD3;
     float4 Color : TEXCOORD4;
+    float4 Albedo : TEXCOORD5;
 };
 
 struct PSInput
@@ -44,7 +48,7 @@ struct PSInput
     float4 Binormal : SV_Target2;
     float4 Tangent : SV_Target3;
     float4 Color : SV_Target4;
-
+    float4 Albedo : SV_Target5;
 };
 
 struct PSFinal
@@ -141,6 +145,9 @@ PSInput RTWriter(RTInput Input)
     Output.Binormal = float4(Input.Binormal, 1.0f);
     Output.Tangent = float4(Input.Tangent, 1.0f);
     Output.Color = Input.Color;
+    
+    Output.Albedo = CubeSlot.Sample(SampleState, Output.Normal.rgb);
+
 
     return Output;
 }
@@ -148,8 +155,7 @@ PSInput RTWriter(RTInput Input)
 PSInput LineRTWriter(RTInput Input)
 {
     PSInput Output = (PSInput) 0;
-    Output.Normal = float4(Input.Normal, 1.0f);
-    Output.Tangent = float4(Input.Tangent, 1.0f);
+
     Output.Color = Input.Color;
 
     return Output;
@@ -193,6 +199,7 @@ PSFinal DeferredPS(RTInput Input)
     PSFinal Output = (PSFinal)0;
 
     float3 Position = PositionBuffer.Sample(SampleState, Input.UV).rgb;
+    float3 Albedo = AlbedoBuffer.Sample(SampleState, Input.UV).rgb;
 
     float3 Normal = NormalBuffer.Sample(SampleState, Input.UV).rgb;
     float3 Binormal = BinormalBuffer.Sample(SampleState, Input.UV).rgb;
@@ -216,7 +223,7 @@ PSFinal DeferredPS(RTInput Input)
         float3 luminance = saturate(dot(lightDir, FinalColor));
         FinalColor = luminance;
     }
-    Output.Color = float4(FinalColor, 1.0f)+Input.Color;
+    Output.Color = float4(FinalColor+Albedo, 1.0f)+Input.Color;
     
     return Output;
 }
@@ -262,7 +269,6 @@ PSFinal DepthBufferPS(RTInput Input)
 }
 
 
-
 float4 ForwardPS(ColorOutput Input) : SV_Target
 {
     float4 Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -298,8 +304,6 @@ technique11 GeometryTech
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetPixelShader(CompileShader(ps_5_0, LineRTWriter()));
     }
-
-    
 
 };
 

@@ -150,12 +150,12 @@ bool D3DHelper::GenerateInputLayout(ID3D11Device* Device, LPCSTR Function, Mater
 		MessageBox(NULL, L"Failed to getting decription from ID3D11ShaderReflection.", 0, 0);
 
 	}
-
+	
 	for (UINT i = 0; i < ShaderDesc.InputParameters; i++)
 	{
 		static D3D11_SIGNATURE_PARAMETER_DESC ParamDesc;
 		Reflect->GetInputParameterDesc(i, &ParamDesc);
-
+		
 		D3D11_INPUT_ELEMENT_DESC Element{};
 
 		Element.SemanticName = ParamDesc.SemanticName;
@@ -443,7 +443,7 @@ bool D3DHelper::AllocDebugLineBuffer(ID3D11Device * Device, Geometry * Geometry,
 		return false;
 	}
 
-
+	
 	return true;
 }
 bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
@@ -468,7 +468,7 @@ bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
 
 void D3DHelper::ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV)
 {
-	
+
 	DSV->Release();
 
 	for (UINT i = 0; i < BUFFERCOUNT; i++)
@@ -492,12 +492,11 @@ void D3DHelper::ReleaseGBuffer(RTTexture* GBuffer, ID3D11DepthStencilView* DSV)
 
 }
 
-
-
 bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 {
 	ID3DBlob* VertexBlob, *PixelBlob, *ErrorBlob;
 	ID3D11InputLayout* TempLayout;
+	ID3D11ShaderReflection* Reflect;
 	HRESULT hr;
 	D3DX11_PASS_DESC Desc{};
 
@@ -512,6 +511,21 @@ bool D3DHelper::CompileShader(ID3D11Device * Device, Material* Resource)
 	Resource->SetViewMatrixPointer(Resource->GetEffect()->GetVariableByName("View")->AsMatrix());
 	Resource->SetProjectionMatrixPointer(Resource->GetEffect()->GetVariableByName("Projection")->AsMatrix());
 
+	for(UINT i=0;;++i)
+	{
+		if (!Resource->GetEffect()->GetVariableByIndex(i)->IsValid())
+			break;
+
+		D3DX11_EFFECT_VARIABLE_DESC Desc;
+		ID3DX11EffectVariable* M = Resource->GetEffect()->GetVariableByIndex(i);
+
+		M->GetDesc(&Desc);
+
+		std::string str = Desc.Name;
+
+		Resource->GetShaderVariables()._Insert_or_assign(str, M);
+
+	}
 
 	//if (FAILED(Resource->GetEffect()->GetTechniqueByName("GeometryTech")->GetPassByIndex(0)->GetDesc(&Desc)))
 	//{

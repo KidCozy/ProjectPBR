@@ -6,8 +6,8 @@ void Sphere::OnInit()
 	Vertices.clear();
 	Indices.clear();
 
-	Vertex topVertex{ { 0.0f, +Radius, 0.0f}, { +1.0f, 0.0f, 1.0f} };
-	Vertex bottomVertex{ { 0.0f, -Radius, 0.0f}, {-1.0f, 0.0f, 1.0f} };
+	Vertex topVertex{ { 0.0f, +Radius, 0.0f}, { +1.0f, 0.0f, 1.0f},{0.0f,1.0f,0.0f }, { 1.0f,0.0f,0.0f }, { 0.0f,0.0f } };
+	Vertex bottomVertex{ { 0.0f, -Radius, 0.0f}, {-1.0f, 0.0f, 1.0f}, {0.0f,-1.0f,0.0f}, {-1.0f,0.0f,0.0f}, {0.0f,1.0f} };
 
 	Vertices.push_back(topVertex);
 
@@ -31,6 +31,9 @@ void Sphere::OnInit()
 			v.Tangent.x = -Radius * sinf(phi)*sinf(theta);
 			v.Tangent.y = 0.0f;
 			v.Tangent.z = +Radius * sinf(phi)*cosf(theta);
+
+			v.UV.x = theta / XM_2PI;
+			v.UV.y = phi / XM_PI;
 
 			XMVECTOR p = XMLoadFloat3(&v.Position);
 			XMVECTOR b;
@@ -84,6 +87,7 @@ void Sphere::OnInit()
 
 		DebugLine[1].LineIndices[i] = i;
 		DebugLine[1].LineIndices[i + 1] = i + 1;
+
 
 		XMStoreFloat4(&DebugLine[0].LineVertices[i].Color, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 		XMStoreFloat4(&DebugLine[0].LineVertices[i+1].Color, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
