@@ -135,7 +135,6 @@ ColorOutput BasicVS(VSLineInput Input)
     return Output;
 }
 
-
 PSInput RTWriter(RTInput Input)
 {
     PSInput Output = (PSInput)0;

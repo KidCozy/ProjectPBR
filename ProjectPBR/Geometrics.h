@@ -1,8 +1,10 @@
 #pragma once
-#include"Transform.h"
+
 #include<D3D11.h>
 #include<Windows.h>
 #include<DirectXMath.h>
+#include"EventHandler.h"
+#include"Transform.h"
 using namespace DirectX;
 
 struct Vertex {

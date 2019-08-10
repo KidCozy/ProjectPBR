@@ -3,11 +3,15 @@
 void Transform::Translation(XMVECTOR Offset)
 {
 	XMMATRIX Mat;
+	XMMATRIX Origin;
 
 	Mat = XMLoadFloat4x4(&MatrixOrigin);
+	Origin = XMLoadFloat4x4(&MatrixOrigin);
 
-	Mat = XMMatrixTranslationFromVector(Offset);
+	Mat *= XMMatrixTranslationFromVector(Offset);
 
+
+	XMStoreFloat4x4(&MatrixOrigin, Mat);
 	
 	
 
@@ -20,6 +24,12 @@ void Transform::Rotate(XMVECTOR Offset)
 
 	XMStoreFloat4(&Float4Offset, Offset);
 
+	XMMATRIX Rot;
+
+	Rot = XMLoadFloat4x4(&MatrixOrigin);
+	Rot *= XMMatrixRotationRollPitchYawFromVector(Offset);
+
+	XMStoreFloat4x4(&MatrixOrigin, Rot);
 
 	return;
 
@@ -65,6 +75,7 @@ Transform::Transform()
 
 	Position.SetVectorPointer(&MatrixOrigin._41, &MatrixOrigin._42, &MatrixOrigin._43, &MatrixOrigin._44);
 	
+	Matrix.SetMatrixPointer(&MatrixOrigin);
 	
 
 }

@@ -1,7 +1,9 @@
 ﻿// ProjectPBR.cpp : 응용 프로그램에 대한 진입점을 정의합니다.
 //
 
+#include<time.h>
 #include "stdafx.h"
+#include"WindowPreset.h"
 #include "ProjectPBR.h"
 #include "Engine.h"
 
@@ -12,6 +14,7 @@ HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
+
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -20,6 +23,9 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 HWND hWnd;
 Engine GEngine;
+WinEvent InputEvents;
+
+WinMessage NewEvent{}, PreviousEvent{};
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -47,6 +53,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	GEngine.Init();
 
+	double t = 0.0f;
+	double CurrentTime = clock();
+
     while (msg.message != WM_QUIT)
     {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -57,8 +66,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			}
 		}
 		else {
+			double NewTime = clock();
+			double FrameTime = NewTime - CurrentTime;
+			CurrentTime = NewTime;
+
 			GEngine.Update();
+			
+			t += FrameTime;
+			
 			GEngine.Render();
+			PreviousEvent = NewEvent;
+			//std::cout << NewEvent.lParam << ", " << NewEvent.wParam << std::endl;
+
 		}
 
     }
@@ -110,21 +129,68 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-
+	NewEvent = { message, wParam, lParam };
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 		return true;
 
-    switch (message)
-    {
+	
+
+	switch (message)
+	{
+		
+	case WM_CREATE:
+	{
+		std::cout << lParam << std::endl;
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	{
+		std::cout << lParam << std::endl;
+		InputEvents.LButton = true;
+
+		break;
+	}
+
+	case WM_RBUTTONDOWN:
+	{
+		InputEvents.RButton = true;
+	//	ShowCursor(false);
+		break;
+	}
+
+	case WM_MOUSEMOVE:
+	{
+		if (InputEvents.RButton)
+			GEngine.RDragNotify(&PreviousEvent, &NewEvent);
+		break;
+	}
+
+	case WM_LBUTTONUP:
+	{
+		InputEvents.LButton = false;
+		break;
+	}
+
+	case WM_RBUTTONUP:
+	{
+		InputEvents.RButton = false;
+		
+		break;
+	}
+
+	case WM_KEYDOWN:
+	{
+		GEngine.KeyEnterNotify(&PreviousEvent, &NewEvent);
+		break;
+	}
+
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
             // 메뉴 선택을 구문 분석합니다:
             switch (wmId)
             {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -147,6 +213,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
+
     return 0;
 }
 

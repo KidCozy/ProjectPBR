@@ -20,8 +20,6 @@ protected:
 	virtual void OnRender() = 0;
 	virtual void OnRelease() = 0;
 
-
-
 public:
 
 	virtual void Init();
@@ -31,4 +29,5 @@ public:
 
 	VirtualObject();
 	virtual ~VirtualObject();
+
 };

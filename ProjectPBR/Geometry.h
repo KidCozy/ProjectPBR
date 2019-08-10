@@ -1,6 +1,7 @@
 #pragma once
 #include<vector>
 #include<d3d11.h>
+
 #include"Material.h"
 #include"Geometrics.h"
 
@@ -11,7 +12,8 @@ struct Line
 	BaseBuffer Buffer;
 };
 
-class Geometry
+class Geometry :
+	public EventHandler
 {
 protected:
 
@@ -49,4 +51,13 @@ public:
 
 	Geometry();
 	virtual ~Geometry();
+
+	// EventHandler을(를) 통해 상속됨
+	virtual void RDragNotify(WinMessage* Event, WinMessage* NewEvent) override;
+
+	// EventHandler을(를) 통해 상속됨
+	virtual void LDragNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyPressNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyReleaseNotify(WinMessage * Event, WinMessage * NewEvent) override;
 };

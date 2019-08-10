@@ -10,6 +10,7 @@
 
 
 #include"DXGIPreset.h"
+#include"EventHandler.h"
 #include"VirtualObject.h"
 #include"D3DHelper.h"
 #include"Sphere.h"
@@ -32,10 +33,11 @@ struct ImGuiVariables
 	int Radio_Technique;
 	int Radio_BufferVisualization;
 	bool Radio_DebugLine;
+	bool Radio_Spd;
 };
 
 class RenderManager :
-	public VirtualObject
+	public VirtualObject, public EventHandler
 {
 private:
 
@@ -130,5 +132,13 @@ public:
 	RenderManager(UINT InWidth, UINT InHeight, _In_ ID3D11Device* InDevice, _In_ ID3D11DeviceContext* InContext, UINT BufferCount);
 	virtual ~RenderManager() {}
 
-};
 
+	// EventHandler을(를) 통해 상속됨
+	virtual void RDragNotify(WinMessage* Event, WinMessage* NewEvent) override;
+
+	// EventHandler을(를) 통해 상속됨
+	virtual void LDragNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyPressNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyReleaseNotify(WinMessage * Event, WinMessage * NewEvent) override;
+};

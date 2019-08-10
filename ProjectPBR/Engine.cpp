@@ -12,8 +12,9 @@ void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 	RenderTargetDesc->Width = Width;
 	RenderTargetDesc->MipLevels = 1;
 	RenderTargetDesc->Usage = D3D11_USAGE_DEFAULT;
-	RenderTargetDesc->SampleDesc.Count = Helper.GetSampleCount();
-	RenderTargetDesc->SampleDesc.Quality = Helper.GetSampleQuality();
+	RenderTargetDesc->SampleDesc.Count = 1;
+	RenderTargetDesc->SampleDesc.Quality = 0;
+	RenderTargetDesc->CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 
 	D3D11_TEXTURE2D_DESC* DepthStencilDesc = Renderer.GetDepthStencilDesc();
 	DepthStencilDesc->ArraySize = 1;
@@ -126,4 +127,26 @@ void Engine::OnRender()
 void Engine::OnRelease()
 {
 	Renderer.Release();
+}
+
+void Engine::RDragNotify(WinMessage* Event, WinMessage* NewEvent)
+{
+	Renderer.RDragNotify(Event, NewEvent);
+}
+
+void Engine::LDragNotify(WinMessage * Event, WinMessage * NewEvent)
+{
+}
+
+void Engine::KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent)
+{
+	Renderer.KeyEnterNotify(Event, NewEvent);
+}
+
+void Engine::KeyPressNotify(WinMessage * Event, WinMessage * NewEvent)
+{
+}
+
+void Engine::KeyReleaseNotify(WinMessage * Event, WinMessage * NewEvent)
+{
 }

@@ -120,6 +120,15 @@
     <ClInclude Include="TextureResource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="WindowPreset.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EventHandler.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Spectrum.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -183,6 +192,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="TextureResource.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Spectrum.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

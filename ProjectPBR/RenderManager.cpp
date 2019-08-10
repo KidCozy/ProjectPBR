@@ -113,6 +113,28 @@ RenderManager::RenderManager(UINT InWidth, UINT InHeight, ID3D11Device * InDevic
 
 }
 
+void RenderManager::RDragNotify(WinMessage* Event, WinMessage* NewEvent)
+{
+	StaticCamera.RDragNotify(Event, NewEvent);
+}
+
+void RenderManager::LDragNotify(WinMessage * Event, WinMessage * NewEvent)
+{
+}
+
+void RenderManager::KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent)
+{
+	StaticCamera.KeyEnterNotify(Event, NewEvent);
+}
+
+void RenderManager::KeyPressNotify(WinMessage * Event, WinMessage * NewEvent)
+{
+}
+
+void RenderManager::KeyReleaseNotify(WinMessage * Event, WinMessage * NewEvent)
+{
+}
+
 void RenderManager::PostInitialize()
 {
 	SetMaterialPath();
@@ -159,6 +181,7 @@ void RenderManager::OnInit()
 	ImGuiVar.Radio_BufferVisualization = 0;
 	ImGuiVar.Radio_Technique = 0;
 	ImGuiVar.Radio_DebugLine = false;
+	ImGuiVar.Radio_Spd = false;
 
 	v = Skybox.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView();
 	sr = Skybox.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource();
@@ -178,7 +201,7 @@ void RenderManager::OnInit()
 void RenderManager::OnUpdate()
 {
 	ClearScreen(DirectX::Colors::Green);
-
+	
 }
 
 void RenderManager::OnRender()
@@ -253,13 +276,68 @@ void RenderManager::RenderImGui()
 			break;
 		}
 		ImGui::Checkbox("Normal Debug Line", &ImGuiVar.Radio_DebugLine);
+		ImGui::Checkbox("Spectral Power Distribution", &ImGuiVar.Radio_Spd);
 
 		ImGui::EndGroup();
 		ImGui::End();
 	}
 
+	if (ImGuiVar.Radio_Spd)
+	{
+		static float c[] = { 0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,8.0f,9.0f,4.0,7.4f,1.2f,3.7f,9.3f };
+		static int t = 60;
+		static byte* Data;
+		D3D11_TEXTURE2D_DESC SampleDesc{};
+		ID3D11Texture2D* SampleTex = nullptr;
+
+		SampleDesc.ArraySize = 1;
+		SampleDesc.BindFlags = NULL;
+		SampleDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		SampleDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		SampleDesc.Height = Height;
+		SampleDesc.Width = Width;
+		SampleDesc.MipLevels = 1;
+		SampleDesc.MiscFlags = 0;
+		SampleDesc.Usage = D3D11_USAGE_STAGING;
+		SampleDesc.SampleDesc.Count = 1;
+		SampleDesc.SampleDesc.Quality = 0;
+
+		Device->CreateTexture2D(&SampleDesc, nullptr, &SampleTex);
+
+		Context->CopyResource(SampleTex, GBuffer[0].Texture);
+		//GBuffer[0].RTV->GetResource((ID3D11Resource**)&SampleTex);
+		D3D11_MAPPED_SUBRESOURCE MapResource;
+		HRESULT hr;
+		hr = Context->Map(SampleTex, 0, D3D11_MAP_READ, NULL, &MapResource);
+		if(FAILED(hr))
+		{
+			MessageBox(NULL, L"Failed to mapping", 0, 0);
+		}
+
+		static int size = Width * Height * 3 * sizeof(byte);
+		Data = new byte[size];
+
+		float* h = new float[size];
+
+
+		memcpy(Data, MapResource.pData, size);
+		
+		for (int i = 0; i < size; i++)
+			h[i] = Data[i];
+
+
+		ImGui::Begin("SPD", &ImGuiVar.Radio_Spd);
+		{
+			ImGui::PlotLines("Spectral Power Distribution", h, size, t, "SPD",-1.0f,25.0f, ImVec2(0, 160));
+	
+		}
+		ImGui::End();
+	}
 
 	ImGui::EndFrame();
+
+
+
 	ImGui::Render();
 	Context->OMSetRenderTargets(1, &MergeBuffer, nullptr);
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

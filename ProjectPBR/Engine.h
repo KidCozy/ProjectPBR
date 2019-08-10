@@ -1,6 +1,5 @@
 #include<DirectXMath.h>
 #include<DirectXColors.h>
-
 #include "VirtualObject.h"
 #include"RenderManager.h"
 #include"D3DHelper.h"
@@ -8,7 +7,7 @@
 using namespace DirectX;
 
 class Engine :
-	public VirtualObject
+	public VirtualObject, public EventHandler
 {
 private:
 	HWND MainWindow;
@@ -36,7 +35,17 @@ protected:
 	virtual void OnRelease() override;
 
 public:
+
 	Engine() {}
 	Engine(_In_ HWND hwnd, UINT InWidth, UINT InHeight) : MainWindow(hwnd), Width(InWidth), Height(InHeight) {}
 	virtual ~Engine() {}
+
+	// EventHandler을(를) 통해 상속됨
+	virtual void RDragNotify(WinMessage* PreviousEvent, WinMessage* NewEvent) override;
+
+	// EventHandler을(를) 통해 상속됨
+	virtual void LDragNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyPressNotify(WinMessage * Event, WinMessage * NewEvent) override;
+	virtual void KeyReleaseNotify(WinMessage * Event, WinMessage * NewEvent) override;
 };

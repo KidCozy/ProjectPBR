@@ -43,7 +43,7 @@ void Sphere::OnInit()
 			//XMStoreFloat3(&v.Tangent, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&v.Binormal), XMLoadFloat3(&v.Normal))));
 
 			XMStoreFloat3(&v.Normal, XMVector3Normalize(p));
-			XMStoreFloat3(&v.Binormal, XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f));
+			XMStoreFloat3(&v.Binormal, XMVector3Cross(XMLoadFloat3(&v.Tangent), XMLoadFloat3(&v.Normal)));
 
 			Vertices.push_back(v);
 		}

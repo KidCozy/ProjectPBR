@@ -1,5 +1,10 @@
 #pragma once
 #include<DirectXMath.h>
+
+#ifdef _DEBUG
+	#include<iostream>
+#endif
+
 using namespace DirectX;
 
 struct MatrixPtr 
@@ -35,6 +40,9 @@ public:
 	void Translation(XMVECTOR Offset);
 	void Rotate(XMVECTOR Offset);
 	void SetScale(XMVECTOR NewScale);
+	_inline void SetMatrix(XMMATRIX Mat) { XMStoreFloat4x4(&MatrixOrigin, Mat); }
+
+	MatrixPtr* GetMatrixPointer() { return &Matrix; }
 
 	XMFLOAT4X4 GetTransform() const { return MatrixOrigin; }
 	XMFLOAT3 GetPosition() const { return XMFLOAT3(MatrixOrigin._41, MatrixOrigin._42, MatrixOrigin._43); }
