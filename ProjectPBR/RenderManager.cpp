@@ -10,10 +10,12 @@ void RenderManager::SetMaterialPath()
 	}
 
 	ArrayContainer[0]->SetFile(L"DefaultShader.fx");
-	ArrayContainer[1]->SetFile(L"ScreenQuadShader.fx");
+	ArrayContainer[1]->SetFile(L"DefaultShader.fx");
+	ArrayContainer[2]->SetFile(L"ScreenQuadShader.fx");
 
 	MaterialContainer.push_back(ArrayContainer[0]);
 	MaterialContainer.push_back(ArrayContainer[1]);
+	MaterialContainer.push_back(ArrayContainer[2]);
 
 }
 
@@ -139,7 +141,7 @@ void RenderManager::PostInitialize()
 {
 	SetMaterialPath();
 	D3DHelper::CompileShader(Device, MaterialContainer.data()[0]);
-	//D3DHelper::CompileShader(Device, MaterialContainer.data()[1]);
+	D3DHelper::CompileShader(Device, MaterialContainer.data()[1]);
 
 }
 
@@ -154,14 +156,16 @@ void RenderManager::ClearScreen(XMVECTORF32 ClearColor)
 
 void RenderManager::OnInit()
 {
-	Skybox.SetMaterial(MaterialContainer.data()[0]);
-	Skybox.SetProperty(10.0f, 64, 64);
+	Skybox.SetMaterial(MaterialContainer.data()[1]);
+	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
+
+	Skybox.SetProperty(20.0f, 64, 64);
 	Skybox.Init();
 
-	Skybox.AddEnvironmentTexture(Device, L"Resources/Textures/Skybox_beach.dds");
+	Skybox.AddEnvironmentTexture(Device, L"Resources/Textures/Skybox_crowd.dds");
+	StaticSphere.AddEnvironmentTexture(Device, L"Resources/Textures/Skybox_beach.dds");
 
-	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
-	StaticSphere.SetProperty(1.0f, 32, 32);
+	StaticSphere.SetProperty(1.0f, 256, 256);
 	StaticSphere.Init();
 
 	ScreenQuad.SetMaterial(MaterialContainer.data()[0]);
@@ -183,8 +187,9 @@ void RenderManager::OnInit()
 	ImGuiVar.Radio_DebugLine = false;
 	ImGuiVar.Radio_Spd = false;
 
-	v = Skybox.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView();
+	v = Skybox.GetMaterial()->GetTextures()["Skybox_crowd.dds"]->GetShaderResourceView();
 	sr = Skybox.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource();
+
 
 
 
@@ -201,19 +206,21 @@ void RenderManager::OnInit()
 void RenderManager::OnUpdate()
 {
 	ClearScreen(DirectX::Colors::Green);
-	
 }
 
 void RenderManager::OnRender()
 {
+
+	StaticSphere.GetMaterial()->GetShaderVariables()["ViewDirection"]->AsVector()->SetFloatVector(StaticCamera.GetDirection().m128_f32);
+
 	DrawObject(&StaticSphere);
 	if(ImGuiVar.Radio_DebugLine)
 		DrawDebugLine(&StaticSphere,0);
 	DrawObject(&Skybox);
 
+	
 
-
-	if (FAILED(sr->SetResource(Skybox.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView())))
+	if (FAILED(sr->SetResource(Skybox.GetMaterial()->GetTextures()["Skybox_crowd.dds"]->GetShaderResourceView())))
 	{
 		MessageBox(NULL, L"Failed to set cubeslot resource.", 0, 0);
 	}
@@ -248,6 +255,9 @@ void RenderManager::OnRelease()
 	DepthStencilView->Release();
 	D3DHelper::ReleaseGBuffer(GBuffer, DepthStencilView);
 
+	HistoSample.SampleTex->Release();
+	HistoSample.Data = nullptr;
+
 }
 
 void RenderManager::RenderImGui()
@@ -257,6 +267,11 @@ void RenderManager::RenderImGui()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 	{
+		ID3DX11EffectScalarVariable* Rough = StaticSphere.GetMaterial()->GetShaderVariables()["Roughness"]->AsScalar();
+		static float Roughness;
+		static bool RenderEnvMap = false;
+
+
 		ImGui::Begin("Menu");
 		ImGui::Text("Buffer Visualization");
 		ImGui::BeginGroup();
@@ -276,63 +291,84 @@ void RenderManager::RenderImGui()
 			break;
 		}
 		ImGui::Checkbox("Normal Debug Line", &ImGuiVar.Radio_DebugLine);
-		ImGui::Checkbox("Spectral Power Distribution", &ImGuiVar.Radio_Spd);
+		ImGui::Checkbox("Spectral Power Distribution", &ImGuiVar.Radio_Spd); ImGui::SameLine();
+		ImGui::Checkbox("Render Environment Map", &RenderEnvMap);
+		ImGui::SliderFloat("Roughness", &Roughness, 0.01f,1.0f);
+		Rough->SetFloat(Roughness);
 
 		ImGui::EndGroup();
 		ImGui::End();
+
+
+		if (RenderEnvMap)
+		{
+			StaticSphere.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource()->SetResource(StaticSphere.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView());
+
+		}
+		else
+		{
+			StaticSphere.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource()->SetResource(nullptr);
+
+		}
+
 	}
 
 	if (ImGuiVar.Radio_Spd)
 	{
 		static float c[] = { 0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,8.0f,9.0f,4.0,7.4f,1.2f,3.7f,9.3f };
 		static int t = 60;
-		static byte* Data;
-		D3D11_TEXTURE2D_DESC SampleDesc{};
-		ID3D11Texture2D* SampleTex = nullptr;
 
-		SampleDesc.ArraySize = 1;
-		SampleDesc.BindFlags = NULL;
-		SampleDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-		SampleDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		SampleDesc.Height = Height;
-		SampleDesc.Width = Width;
-		SampleDesc.MipLevels = 1;
-		SampleDesc.MiscFlags = 0;
-		SampleDesc.Usage = D3D11_USAGE_STAGING;
-		SampleDesc.SampleDesc.Count = 1;
-		SampleDesc.SampleDesc.Quality = 0;
 
-		Device->CreateTexture2D(&SampleDesc, nullptr, &SampleTex);
 
-		Context->CopyResource(SampleTex, GBuffer[0].Texture);
+		HistoSample.SampleDesc.ArraySize = 1;
+		HistoSample.SampleDesc.BindFlags = NULL;
+		HistoSample.SampleDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		HistoSample.SampleDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		HistoSample.SampleDesc.Height = Height;
+		HistoSample.SampleDesc.Width = Width;
+		HistoSample.SampleDesc.MipLevels = 1;
+		HistoSample.SampleDesc.MiscFlags = 0;
+		HistoSample.SampleDesc.Usage = D3D11_USAGE_STAGING;
+		HistoSample.SampleDesc.SampleDesc.Count = 1;
+		HistoSample.SampleDesc.SampleDesc.Quality = 0;
+
+		Device->CreateTexture2D(&HistoSample.SampleDesc, nullptr, &HistoSample.SampleTex);
+
+		Context->CopyResource(HistoSample.SampleTex, GBuffer[0].Texture);
 		//GBuffer[0].RTV->GetResource((ID3D11Resource**)&SampleTex);
-		D3D11_MAPPED_SUBRESOURCE MapResource;
+		
 		HRESULT hr;
-		hr = Context->Map(SampleTex, 0, D3D11_MAP_READ, NULL, &MapResource);
+		hr = Context->Map(HistoSample.SampleTex, 0, D3D11_MAP_READ, NULL, &HistoSample.MapResource);
 		if(FAILED(hr))
 		{
 			MessageBox(NULL, L"Failed to mapping", 0, 0);
 		}
 
 		static int size = Width * Height * 3 * sizeof(byte);
-		Data = new byte[size];
+		HistoSample.Data = new byte[size];
 
 		float* h = new float[size];
 
-
-		memcpy(Data, MapResource.pData, size);
+		memcpy(HistoSample.Data, HistoSample.MapResource.pData, size);
 		
 		for (int i = 0; i < size; i++)
-			h[i] = Data[i];
+			h[i] = HistoSample.Data[i];
 
 
 		ImGui::Begin("SPD", &ImGuiVar.Radio_Spd);
 		{
-			ImGui::PlotLines("Spectral Power Distribution", h, size, t, "SPD",-1.0f,25.0f, ImVec2(0, 160));
+			ImGui::NewLine();
+			ImGui::PlotLines("Spectral Power Distribution", h, size, 0, "SPD",-1.0f,256, ImVec2(0, 160));
 	
 		}
 		ImGui::End();
+
+		delete HistoSample.Data;
+		HistoSample.SampleTex->Release();
+
 	}
+
+
 
 	ImGui::EndFrame();
 
@@ -341,6 +377,7 @@ void RenderManager::RenderImGui()
 	ImGui::Render();
 	Context->OMSetRenderTargets(1, &MergeBuffer, nullptr);
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
 
 }
 

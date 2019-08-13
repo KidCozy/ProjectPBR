@@ -174,7 +174,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_RBUTTONUP:
 	{
 		InputEvents.RButton = false;
-		
+		ShowCursor(true);
 		break;
 	}
 

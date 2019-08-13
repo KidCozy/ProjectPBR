@@ -151,6 +151,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collider.h" />
     <ClInclude Include="ConstantGeometry.h" />
     <ClInclude Include="D3DHelper.h" />
     <ClInclude Include="DXGIPreset.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="ProjectPBR.h" />
     <ClInclude Include="Quad.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="RenderManager.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Skybox.h" />
@@ -185,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ConstantGeometry.cpp" />
     <ClCompile Include="D3DHelper.cpp" />
     <None Include="DefaultShader.fx">
@@ -201,6 +204,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ProjectPBR.cpp" />
     <ClCompile Include="Quad.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Spectrum.cpp" />

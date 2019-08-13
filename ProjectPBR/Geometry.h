@@ -1,7 +1,7 @@
 #pragma once
 #include<vector>
 #include<d3d11.h>
-
+#include"Collider.h"
 #include"Material.h"
 #include"Geometrics.h"
 
@@ -60,4 +60,5 @@ public:
 	virtual void KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent) override;
 	virtual void KeyPressNotify(WinMessage * Event, WinMessage * NewEvent) override;
 	virtual void KeyReleaseNotify(WinMessage * Event, WinMessage * NewEvent) override;
+
 };

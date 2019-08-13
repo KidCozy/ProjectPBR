@@ -18,6 +18,8 @@ public:
 	XMMATRIX GetView() const { return XMLoadFloat4x4(&Matrix.GetTransform()); }
 	XMMATRIX GetProjection() const { return XMLoadFloat4x4(&Projection); }
 
+	XMVECTOR GetDirection() const;
+
 	Camera(float InAR, float InFOV, float InNear, float InFar);
 	~Camera();
 

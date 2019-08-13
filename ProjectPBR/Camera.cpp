@@ -1,5 +1,10 @@
 #include "Camera.h"
 
+XMVECTOR Camera::GetDirection() const
+{
+	return XMVectorSet(Matrix.GetTransform()._13,Matrix.GetTransform()._23, Matrix.GetTransform()._33, 1.0f);
+}
+
 Camera::Camera(float InAR, float InFOV, float InNear, float InFar)
 {
 	XMMATRIX MatView, MatProjection;
@@ -9,7 +14,6 @@ Camera::Camera(float InAR, float InFOV, float InNear, float InFar)
 	FOV = InFOV;
 	Near = InNear;
 	Far = InFar;
-
 
 	Eye = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 	At = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
@@ -36,7 +40,7 @@ void Camera::RDragNotify(WinMessage* Event, WinMessage* NewEvent)
 	rt.right = 1280;
 	rt.top = 0;
 //	std::cout << "Camera Notify" << std::endl;
-	ShowCursor(false);
+//	ShowCursor(false);
 
 	int Px = HIWORD(Event->lParam);
 	int Py = LOWORD(Event->lParam);
@@ -44,8 +48,8 @@ void Camera::RDragNotify(WinMessage* Event, WinMessage* NewEvent)
 	int Cx = HIWORD(NewEvent->lParam);
 	int Cy = LOWORD(NewEvent->lParam);
 
-	float DeltaX = ((Cx - Px) * 0.001f);
-	float DeltaY = ((Cy - Py) * 0.001f);
+	float DeltaX = ((Cx - Px) * 0.01f);
+	float DeltaY = ((Cy - Py) * 0.01f);
 
 	Matrix.Rotate(XMVectorSet(DeltaX, DeltaY, 0.0f, 1.0f));
 
@@ -58,9 +62,6 @@ void Camera::LDragNotify(WinMessage * Event, WinMessage * NewEvent)
 
 void Camera::KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent)
 {
-	UINT Key;
-
-	Key = GetAsyncKeyState(NewEvent->wParam) & 0x8000;
 
 	if(GetAsyncKeyState('W') & 0x8000)
 		Matrix.Translation(XMVectorSet(0.0f, 0.0f, -0.1f, 1.0f));
@@ -72,29 +73,6 @@ void Camera::KeyEnterNotify(WinMessage * Event, WinMessage * NewEvent)
 
 	if (GetAsyncKeyState('D') & 0x8000)
 		Matrix.Translation(XMVectorSet(-0.1f, 0.0f, 0.0f, 1.0f));
-
-
-
-
-		//switch (NewEvent->wParam)
-		//{
-		//	case (0x57):
-		//	//	std::cout << "W" << std::endl;
-
-		//		break;
-		//	case 0x53:
-		//	//	std::cout << "S" << std::endl;
-
-		//		break;
-		//	case 0x41:
-		//	//	std::cout << "A" << std::endl;
-
-		//		break;
-		//	case 0x44:
-		//	//	std::cout << "D" << std::endl;
-
-		//		break;
-		//}
 }
 
 void Camera::KeyPressNotify(WinMessage * Event, WinMessage * NewEvent)

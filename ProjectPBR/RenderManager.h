@@ -17,8 +17,16 @@
 #include"Camera.h"
 #include"Quad.h"
 
-#define DEFAULT_MATERIALSIZE 2
+#define DEFAULT_MATERIALSIZE 3
 
+struct Sampler
+{
+	ID3D11Texture2D* SampleTex = nullptr;
+	D3D11_TEXTURE2D_DESC SampleDesc{};
+	D3D11_MAPPED_SUBRESOURCE MapResource{};
+	byte* Data = nullptr;
+	int Size = 0;
+};
 
 enum RENDERBUFFER
 {
@@ -74,6 +82,8 @@ public:
 	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
 
 	XMMATRIX World;
+
+	Sampler HistoSample;
 
 private:
 	void SetMaterialPath();

@@ -11,6 +11,8 @@ Texture2D AlbedoBuffer;
 TextureCube CubeSlot;
 
 float2 PixelOffset;
+float3 ViewDirection;
+float Roughness = 1.0f;
 
 cbuffer ConstantBuffer : register(b0)
 {
@@ -39,6 +41,8 @@ struct RTInput
     float2 UV : TEXCOORD3;
     float4 Color : TEXCOORD4;
     float4 Albedo : TEXCOORD5;
+    float3 Reflection : TEXCOORD6;
+
 };
 
 struct PSInput
@@ -49,6 +53,7 @@ struct PSInput
     float4 Tangent : SV_Target3;
     float4 Color : SV_Target4;
     float4 Albedo : SV_Target5;
+    float4 Reflection : SV_Target6;
 };
 
 struct PSFinal
@@ -118,7 +123,8 @@ RTInput VS(VSInput Input)
 
     Output.UV = Input.UV;
     Output.Color = Input.Color;
-    
+
+    float3 viewDir = normalize(ViewDirection);
 
     return Output;
 }
@@ -143,10 +149,11 @@ PSInput RTWriter(RTInput Input)
     Output.Normal = float4(Input.Normal, 1.0f);
     Output.Binormal = float4(Input.Binormal, 1.0f);
     Output.Tangent = float4(Input.Tangent, 1.0f);
+    Output.Reflection = float4(Input.Reflection, 1.0f);
+    
     Output.Color = Input.Color;
     
     Output.Albedo = CubeSlot.Sample(SampleState, Output.Normal.rgb);
-
 
     return Output;
 }
@@ -205,24 +212,67 @@ PSFinal DeferredPS(RTInput Input)
     float3 Tangent = TangentBuffer.Sample(SampleState, Input.UV).rgb;
 
     float3 Color = Input.Color.rgb;
+    float3 LightDir = normalize(float3(1.0f, 1.0f, 1.0f));
 
     float3 BlurColor = 0;
     float3 FinalColor = Normal;
+    float3 Specular = 0;
+    float3 ViewDir = -normalize(ViewDirection);
 
-    //BlurColor = GaussBlur(Normal, Input.UV);
+    float3 Half = normalize(LightDir + ViewDir);
+
+    float NE = dot(Normal, ViewDir);
+    float NL = dot(Normal, LightDir);
+    float NH = dot(Normal, Half);
+    float VH = dot(ViewDir, Half);
+    float LH = dot(LightDir, Half);
+    float NV = dot(Normal, ViewDir);
+
+    float G = min(1, min(2*NH*NE/VH, 2*NH*NL/VH));
+
+
+
+    float NH2 = NH * NH;
+
+    float D = exp(-(1 - NH2) / (NH2 * Roughness * Roughness)) / (4 * Roughness * Roughness * NH2 * NH2);
+
+    float N = 20.0f;
+    float g = sqrt(N * N + LH * LH - 1);
+    float gpc = g + LH;
+    float gnc = g - LH;
+    float cgpc = LH * gpc - 1;
+    float cgnc = LH * gnc + 1;
+    float F = 0.5f * gnc * gnc * (1 + cgpc * cgpc / (cgnc * cgnc)) / (gpc * gpc);
+
+    float4 ks = { 1.0f,1.0f,1.0f, 1.0f };
+
+  //  BlurColor = GaussBlur(Normal, Input.UV);
   
     if (length(BlurColor) > 0.0f)
         FinalColor = BlurColor;
 
 
-    float3 Ambient = float3(0.05f, 0.05f, 0.05f);
+    float3 Ambient = float3(0.1f, 0.1f, 0.1f);
     if (length(Normal) > 0.0f)
     {
-        float3 lightDir = normalize(float3(1.0f, 1.0f, 1.0f));
-        float3 luminance = saturate(dot(lightDir, FinalColor));
+        float3 lightDir = normalize(LightDir);
+        float3 luminance = saturate(dot(LightDir, FinalColor));
         FinalColor = luminance;
     }
-    Output.Color = float4(FinalColor+Albedo, 1.0f)+Input.Color;
+
+    Input.Reflection = reflect(LightDir, Normal);
+    Input.Reflection = normalize(Input.Reflection);
+
+    if (FinalColor.x > 0)
+    {
+        Specular = saturate(dot(Input.Reflection, -(normalize(ViewDirection))));
+        Specular = pow(Specular, 10.0f);
+
+    }
+    
+    float3 Final = 0;
+    Final += ks.rgb * max(0, F * D * G / NV);
+    Output.Color = float4(Albedo+Final, 1.0f);
     
     return Output;
 }
