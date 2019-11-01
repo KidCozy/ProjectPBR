@@ -23,16 +23,6 @@ void Quad::OnInit()
 	v3.UV = { 0.0f, 0.0f };
 	v4.UV = { 1.0f, 0.0f };
 
-	//v1.Normal = {0.0f,0.0f,-1.0f};
-	//v2.Normal = {0.0f,0.0f,-1.0f};
-	//v3.Normal = {0.0f,0.0f,-1.0f};
-	//v4.Normal = {0.0f,0.0f,-1.0f};
-
-	//Vertex v1{ {0.0f, 0.0f, 0.0f} };
-	//Vertex v2{ {1.0f, 0.0f, 0.0f} };
-	//Vertex v3{ {0.0f, 1.0f, 0.0f} };
-	//Vertex v4{ {1.0f, 1.0f, 0.0f} };
-
 	WORD i[6] = { 0,1,2,
 				  1,2,3 };
 
@@ -55,6 +45,7 @@ void Quad::OnInit()
 	Depth = MaterialResource.GetEffect()->GetVariableByName("DepthBuffer")->AsShaderResource();
 	Color = MaterialResource.GetEffect()->GetVariableByName("ColorBuffer")->AsShaderResource();
 	Albedo = MaterialResource.GetEffect()->GetVariableByName("AlbedoBuffer")->AsShaderResource();
+	Visible = MaterialResource.GetEffect()->GetVariableByName("RayBuffer")->AsShaderResource();
 
 	PixelOffset = MaterialResource.GetEffect()->GetVariableByName("PixelOffset")->AsVector();
 }

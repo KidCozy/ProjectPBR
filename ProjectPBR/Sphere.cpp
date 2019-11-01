@@ -150,6 +150,8 @@ void Sphere::SetProperty(float InRadius, UINT InSlice, UINT InStack)
 	Slice = InSlice;
 	Stack = InStack;
 
+	
+
 	return;
 }
 

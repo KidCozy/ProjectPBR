@@ -7,6 +7,7 @@ Texture2D TangentBuffer;
 Texture2D DepthBuffer;
 Texture2D ColorBuffer;
 Texture2D AlbedoBuffer;
+Texture2D RayBuffer;
 
 TextureCube CubeSlot;
 
@@ -211,7 +212,8 @@ PSFinal DeferredPS(RTInput Input)
     float3 Binormal = BinormalBuffer.Sample(SampleState, Input.UV).rgb;
     float3 Tangent = TangentBuffer.Sample(SampleState, Input.UV).rgb;
 
-    float3 Color = Input.Color.rgb;
+    float3 Color = ColorBuffer.Sample(SampleState, Input.UV).rgb;
+
     float3 LightDir = normalize(float3(1.0f, 1.0f, 1.0f));
 
     float3 BlurColor = 0;
@@ -246,33 +248,20 @@ PSFinal DeferredPS(RTInput Input)
 
     float4 ks = { 1.0f,1.0f,1.0f, 1.0f };
 
-  //  BlurColor = GaussBlur(Normal, Input.UV);
+    //BlurColor = GaussBlur(Normal, Input.UV);
   
     if (length(BlurColor) > 0.0f)
         FinalColor = BlurColor;
 
 
     float3 Ambient = float3(0.1f, 0.1f, 0.1f);
-    if (length(Normal) > 0.0f)
-    {
-        float3 lightDir = normalize(LightDir);
-        float3 luminance = saturate(dot(LightDir, FinalColor));
-        FinalColor = luminance;
-    }
+    float3 lightDir = normalize(LightDir);
+    float3 luminance = saturate(dot(LightDir, FinalColor));
+    FinalColor = luminance * Color;
 
-    Input.Reflection = reflect(LightDir, Normal);
-    Input.Reflection = normalize(Input.Reflection);
-
-    if (FinalColor.x > 0)
-    {
-        Specular = saturate(dot(Input.Reflection, -(normalize(ViewDirection))));
-        Specular = pow(Specular, 10.0f);
-
-    }
-    
     float3 Final = 0;
-    Final += ks.rgb * max(0, F * D * G / NV);
-    Output.Color = float4(Albedo+Final, 1.0f);
+    Final = ks.rgb * max(0, F * D * G / NV);
+    Output.Color = float4(Albedo+Final+FinalColor, 1.0f);
     
     return Output;
 }

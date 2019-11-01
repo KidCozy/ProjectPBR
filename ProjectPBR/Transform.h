@@ -45,8 +45,8 @@ public:
 	MatrixPtr* GetMatrixPointer() { return &Matrix; }
 
 	XMFLOAT4X4 GetTransform() const { return MatrixOrigin; }
-	XMFLOAT3 GetPosition() const { return XMFLOAT3(MatrixOrigin._41, MatrixOrigin._42, MatrixOrigin._43); }
-	XMFLOAT3 GetRotation() const { return XMFLOAT3(MatrixOrigin._11, MatrixOrigin._22, MatrixOrigin._33); }
+	XMVECTOR GetPosition() const { return XMVectorSet(MatrixOrigin._41, MatrixOrigin._42, MatrixOrigin._43, 1.0f); }
+	XMVECTOR GetRotation() const { return XMVectorSet(MatrixOrigin._11, MatrixOrigin._22, MatrixOrigin._33, 1.0f); }
 	XMFLOAT3 GetScale() const;
 
 	Transform();

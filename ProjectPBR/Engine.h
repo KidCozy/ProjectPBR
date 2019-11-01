@@ -3,6 +3,7 @@
 #include "VirtualObject.h"
 #include"RenderManager.h"
 #include"D3DHelper.h"
+#include"ExtendD3DHelper.h"
 
 using namespace DirectX;
 

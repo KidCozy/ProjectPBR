@@ -1,7 +1,6 @@
 #pragma once
 #include<vector>
 #include<d3d11.h>
-#include"Collider.h"
 #include"Material.h"
 #include"Geometrics.h"
 
@@ -34,7 +33,8 @@ public:
 	void AddEnvironmentTexture(ID3D11Device* Device, LPCWSTR Path);
 
 	void SetMaterial(Material* NewMaterial) { MaterialResource = *NewMaterial; }
-
+	_inline void SetColor(XMVECTOR Color) { for (UINT i = 0; i < Vertices.size(); i++) XMStoreFloat4(&Vertices[i].Color, Color); }
+	
 	Material* GetMaterial() { return &MaterialResource; }
 	Transform* GetTransform() { return &Matrix; }
 

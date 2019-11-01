@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include<DirectXMath.h>
 
-#define BUFFERCOUNT 7
+#define BUFFERCOUNT 8
 #define ASPECT_RATIO 1.777f
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
@@ -32,6 +32,7 @@ struct GBufferDescription
 	D3D11_DEPTH_STENCIL_DESC DepthStencilInfoDesc{};
 	D3D11_TEXTURE2D_DESC RenderTargetDesc{};
 	D3D11_TEXTURE2D_DESC DepthStencilDesc{};
+	D3D11_TEXTURE2D_DESC RayBufferDesc{};
 	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
 	D3D11_SHADER_RESOURCE_VIEW_DESC DepthSRVDesc{};
 	DXGI_SAMPLE_DESC SamplerDesc{};

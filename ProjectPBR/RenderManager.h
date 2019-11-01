@@ -1,4 +1,6 @@
 #pragma once
+#include"Ray.cuh"
+
 #include<d3d11.h>
 #include<dxgi.h>
 #include<vector>
@@ -14,10 +16,14 @@
 #include"VirtualObject.h"
 #include"D3DHelper.h"
 #include"Sphere.h"
+#include"Cube.h"
+
 #include"Camera.h"
 #include"Quad.h"
 
-#define DEFAULT_MATERIALSIZE 3
+
+
+#define DEFAULT_MATERIALSIZE 4
 
 struct Sampler
 {
@@ -28,7 +34,7 @@ struct Sampler
 	int Size = 0;
 };
 
-enum RENDERBUFFER
+enum PASS
 {
 	RENDERBUFFER_GEOMETRY,
 	RENDERBUFFER_MERGE,
@@ -55,6 +61,8 @@ private:
 	ID3DX11EffectShaderResourceVariable* sr;
 	ID3D11ShaderResourceView* v;
 
+	Ray PixelRay;
+
 	ID3D11RenderTargetView* SettingRenderTargets[BUFFERCOUNT];
 	ID3D11RenderTargetView* MergeBuffer = nullptr;
 
@@ -76,7 +84,9 @@ private:
 	ID3DX11EffectTechnique* SelectTech;
 
 public:
+	Cube StaticCube = Cube(1,1,1);
 	Sphere StaticSphere;
+	
 	Sphere Skybox;
 	Quad ScreenQuad;
 	Camera StaticCamera = Camera(ASPECT_RATIO, XM_PIDIV2, 0.01f, 100.0f);
@@ -112,7 +122,7 @@ public:
 
 	void BindBuffer(Geometry* Geometry);
 
-	void DrawObject(Geometry* Object, TECHNIQUES Technique, RENDERBUFFER RenderBuffer);
+	void DrawObject(Geometry* Object, TECHNIQUES Technique, PASS RenderBuffer);
 	void DrawObject(Geometry* Object);
 	void DrawDebugLine(Geometry * Object, UINT Index);
 

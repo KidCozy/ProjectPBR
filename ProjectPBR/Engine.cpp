@@ -64,7 +64,20 @@ void Engine::GenerateDescriptors(GBufferDescription* Descriptor)
 	DepthStencilInfoDesc->BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	DepthStencilInfoDesc->BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
+	D3D11_TEXTURE2D_DESC* RayBufferDesc = &Renderer.GetGBufferDescriptor()->RayBufferDesc;
 
+	RenderTargetDesc->ArraySize = 1;
+	RenderTargetDesc->BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	RenderTargetDesc->Format = DXGI_FORMAT_R32_UINT;
+	RenderTargetDesc->Height = Height;
+	RenderTargetDesc->Width = Width;
+	RenderTargetDesc->MipLevels = 1;
+	RenderTargetDesc->Usage = D3D11_USAGE_DEFAULT;
+	RenderTargetDesc->SampleDesc.Count = 1;
+	RenderTargetDesc->SampleDesc.Quality = 0;
+	RenderTargetDesc->CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	Renderer.GetGBufferDescriptor()->RayBufferDesc = *RenderTargetDesc;
 }
 
 void Engine::InitializeImGui()
@@ -88,11 +101,15 @@ void Engine::PostInitialize()
 	Renderer = RenderManager(Width, Height, Device, Context, BufferCount);
 
 	GenerateDescriptors(Renderer.GetGBufferDescriptor());
-
+	
 	Helper.CreateRenderTargetView(Renderer.GetGBufferPointer(), Renderer.GetGBufferDescriptor());
 	//Helper.CreateDepthStencilView(&*Renderer.GetDepthStencilViewPointer(), Renderer.GetDepthStencilViewDesc());
 	
 	Helper.Resize(Renderer.GetMergeBufferPointer(),Renderer.GetGBufferPointer(), Renderer.GetGBufferVariables(), *Renderer.GetGBufferDescriptor(),Renderer.GetDepthStencilViewPointer());
+	
+	Renderer.GetGBufferPointer()[BUFFERCOUNT - 2].Texture = ExtendD3DHelper::CreateTexture2D(Device, Renderer.GetGBufferDescriptor()->RayBufferDesc);
+	Renderer.GetGBufferPointer()[BUFFERCOUNT - 2].RTV = ExtendD3DHelper::CreateRenderTargetView(Device, &Renderer.GetGBufferPointer()[BUFFERCOUNT-2].Texture, nullptr);
+	Renderer.GetGBufferPointer()[BUFFERCOUNT - 2].SRV = ExtendD3DHelper::CreateShaderResourceView(Device, Renderer.GetGBufferPointer()[BUFFERCOUNT - 2].Texture, nullptr);
 	
 	InitializeImGui();
 

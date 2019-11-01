@@ -5,6 +5,7 @@
 #include<DirectXMath.h>
 #include"EventHandler.h"
 #include"Transform.h"
+#include"Ray.cuh"
 using namespace DirectX;
 
 struct Vertex {
@@ -14,6 +15,10 @@ struct Vertex {
 	DirectX::XMFLOAT3 Tangent{};
 	DirectX::XMFLOAT2 UV{};
 	DirectX::XMFLOAT4 Color{};
+/*
+	Vertex() {}
+	Vertex(XMFLOAT3 Pos, XMFLOAT3 Norm) { Position = Pos; Normal = Norm; }*/
+
 };
 
 struct BaseBuffer {
@@ -26,4 +31,5 @@ struct ConstantBuffer {
 	XMMATRIX World;
 	XMMATRIX View;
 	XMMATRIX Projection;
+	//Ray IncomingRay;
 };

@@ -31,6 +31,27 @@
     <Filter Include="Public\imgui">
       <UniqueIdentifier>{2af99712-715d-45e2-9e48-152a864574d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{ff450d31-26ab-4fd0-8bfc-1b4ec70823d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{acb382fd-2fd4-45c0-8118-f4edcba0f0fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities">
+      <UniqueIdentifier>{76db007b-6b57-4859-959d-53d1fea39fc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CUDA">
+      <UniqueIdentifier>{05ade323-a8c5-4a9c-9250-5da34d614094}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CUDA\Header">
+      <UniqueIdentifier>{a95c7200-5c5e-49c8-b3e2-8526a2d9436f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CUDA\Source">
+      <UniqueIdentifier>{a362a12c-a4b5-41ac-be40-a54ef23f83d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{c384abec-b970-42fe-ab7a-77a7b5a33f15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -40,15 +61,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ProjectPBR.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometry.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometrics.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
@@ -63,25 +75,10 @@
     <ClInclude Include="VirtualObject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Engine.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DHelper.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="DXGIPreset.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Transform.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Quad.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Include\d3dxGlobal.h">
@@ -114,9 +111,6 @@
     <ClInclude Include="imgui\imstb_truetype.h">
       <Filter>Public\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Skybox.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="TextureResource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -129,18 +123,57 @@
     <ClInclude Include="Spectrum.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Ray.h">
+    <ClInclude Include="Engine.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectPBR.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DHelper.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Quad.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometrics.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.cuh">
+      <Filter>CUDA\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Hit.cuh">
+      <Filter>CUDA\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Random.cuh">
+      <Filter>CUDA\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.cuh">
+      <Filter>CUDA\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Collider.h">
+    <ClInclude Include="ExtendD3DHelper.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ProjectPBR.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
@@ -158,13 +191,7 @@
     <ClCompile Include="VirtualObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Engine.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="D3DHelper.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Transform.cpp">
@@ -203,10 +230,22 @@
     <ClCompile Include="Spectrum.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Ray.cpp">
+    <ClCompile Include="ProjectPBR.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Collider.cpp">
+    <ClCompile Include="ExtendD3DHelper.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -225,10 +264,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DefaultShader.fx">
-      <Filter>소스 파일</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="ScreenQuadShader.fx">
-      <Filter>소스 파일</Filter>
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="RaytraceShader.fx">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

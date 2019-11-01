@@ -14,8 +14,11 @@ private:
 	ID3DX11EffectShaderResourceVariable* Depth = nullptr;
 	ID3DX11EffectShaderResourceVariable* Color = nullptr;
 	ID3DX11EffectShaderResourceVariable* Albedo = nullptr;
+	ID3DX11EffectShaderResourceVariable* Visible = nullptr;
+
 
 	ID3DX11EffectVectorVariable* PixelOffset = nullptr;
+	ID3DX11EffectVectorVariable* ViewPosition = nullptr;
 protected:
 
 	virtual void OnInit() override;
@@ -32,6 +35,7 @@ public:
 	void SetDepth(ID3D11ShaderResourceView* InDepth) { Depth->SetResource(InDepth); }
 	void SetColor(ID3D11ShaderResourceView* InColor) { Color->SetResource(InColor); }
 	void SetAlbedo(ID3D11ShaderResourceView* InAlbedo) { Albedo->SetResource(InAlbedo); }
+	void SetRay(ID3D11ShaderResourceView* InRay) { Visible->SetResource(InRay); }
 
 	void SetPixelOffset(XMVECTOR* Offset) { PixelOffset->SetFloatVector(Offset->m128_f32); }
 	Quad();

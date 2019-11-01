@@ -12,10 +12,12 @@ void RenderManager::SetMaterialPath()
 	ArrayContainer[0]->SetFile(L"DefaultShader.fx");
 	ArrayContainer[1]->SetFile(L"DefaultShader.fx");
 	ArrayContainer[2]->SetFile(L"ScreenQuadShader.fx");
+	ArrayContainer[3]->SetFile(L"RaytraceShader.fx");
 
 	MaterialContainer.push_back(ArrayContainer[0]);
 	MaterialContainer.push_back(ArrayContainer[1]);
 	MaterialContainer.push_back(ArrayContainer[2]);
+	MaterialContainer.push_back(ArrayContainer[3]);
 
 }
 
@@ -28,7 +30,7 @@ void RenderManager::BindBuffer(Geometry * Geometry)
 	Context->IASetIndexBuffer(Geometry->GetBuffer()->IBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-void RenderManager::DrawObject(Geometry * Object,TECHNIQUES Technique, RENDERBUFFER RenderBuffer)
+void RenderManager::DrawObject(Geometry * Object,TECHNIQUES Technique, PASS RenderBuffer)
 {
 	static ID3D11RenderTargetView* NullRTV[] = { nullptr };
 
@@ -142,6 +144,7 @@ void RenderManager::PostInitialize()
 	SetMaterialPath();
 	D3DHelper::CompileShader(Device, MaterialContainer.data()[0]);
 	D3DHelper::CompileShader(Device, MaterialContainer.data()[1]);
+	D3DHelper::CompileShader(Device, MaterialContainer.data()[3]);
 
 }
 
@@ -150,8 +153,10 @@ void RenderManager::ClearScreen(XMVECTORF32 ClearColor)
 	Context->ClearRenderTargetView(MergeBuffer, ClearColor);
 	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	for (UINT i = 0; i < (BUFFERCOUNT-1); i++)
+	for (UINT i = 0; i < (BUFFERCOUNT-2); i++)
 		Context->ClearRenderTargetView(GBuffer[i].RTV, ClearColor);
+
+
 }
 
 void RenderManager::OnInit()
@@ -159,16 +164,21 @@ void RenderManager::OnInit()
 	Skybox.SetMaterial(MaterialContainer.data()[1]);
 	StaticSphere.SetMaterial(MaterialContainer.data()[0]);
 
+	StaticCube.SetMaterial(MaterialContainer.data()[3]);
+	StaticCube.Init();
+	StaticCube.SetColor(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
+	D3DHelper::AllocConstantBuffer(Device, &StaticCube);
+
 	Skybox.SetProperty(20.0f, 64, 64);
 	Skybox.Init();
 
 	Skybox.AddEnvironmentTexture(Device, L"Resources/Textures/Skybox_crowd.dds");
 	StaticSphere.AddEnvironmentTexture(Device, L"Resources/Textures/Skybox_beach.dds");
-
 	StaticSphere.SetProperty(1.0f, 256, 256);
 	StaticSphere.Init();
+	StaticSphere.SetColor(XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 
-	ScreenQuad.SetMaterial(MaterialContainer.data()[0]);
+	ScreenQuad.SetMaterial(MaterialContainer.data()[3]);
 	ScreenQuad.Init();
 
 	D3DHelper::AllocConstantBuffer(Device, &StaticSphere);
@@ -206,17 +216,32 @@ void RenderManager::OnInit()
 void RenderManager::OnUpdate()
 {
 	ClearScreen(DirectX::Colors::Green);
-}
+
+	XMMATRIX SpherePos = XMMatrixIdentity();
+
+	SpherePos += XMMatrixTranslation(0.0f, 0.0f, 5.0f);
+
+
+	StaticSphere.GetMaterial()->SetWorldMatrix(SpherePos);
+}	
 
 void RenderManager::OnRender()
 {
 
 	StaticSphere.GetMaterial()->GetShaderVariables()["ViewDirection"]->AsVector()->SetFloatVector(StaticCamera.GetDirection().m128_f32);
+//	StaticSphere.GetMaterial()->GetShaderVariables()["ViewPosition"]->AsVector()->SetFloatVector(StaticCamera.GetTransform().GetPosition().m128_f32);
+	//StaticSphere.GetTransform()->Rotate(XMVectorSet(0.1f, 0.0f, 0.0f,1.0f));
+	
+	StaticCube.GetMaterial()->GetShaderVariables()["ViewDirection"]->AsVector()->SetFloatVector(StaticCamera.GetDirection().m128_f32);
+	StaticCube.GetMaterial()->GetShaderVariables()["ViewPosition"]->AsVector()->SetFloatVector(StaticCamera.GetTransform().GetPosition().m128_f32);
+
 
 	DrawObject(&StaticSphere);
+	DrawObject(&StaticCube, (TECHNIQUES)TECHNIQUE_RAY, (PASS)0);
+
 	if(ImGuiVar.Radio_DebugLine)
 		DrawDebugLine(&StaticSphere,0);
-	DrawObject(&Skybox);
+	//DrawObject(&Skybox);
 
 	
 
@@ -225,9 +250,6 @@ void RenderManager::OnRender()
 		MessageBox(NULL, L"Failed to set cubeslot resource.", 0, 0);
 	}
 
-//	DrawDebugLine(&StaticSphere,1);
-	//DrawDebugLine(&StaticSphere,2);
-
 
 	ScreenQuad.SetPosition(GBuffer[0].SRV);
 	ScreenQuad.SetNormal(GBuffer[1].SRV);
@@ -235,11 +257,12 @@ void RenderManager::OnRender()
 	ScreenQuad.SetTangent(GBuffer[3].SRV);
 	ScreenQuad.SetColor(GBuffer[4].SRV);
 	ScreenQuad.SetAlbedo(GBuffer[5].SRV);
+	ScreenQuad.SetRay(GBuffer[BUFFERCOUNT - 2].SRV);
 	ScreenQuad.SetDepth(GBuffer[BUFFERCOUNT - 1].SRV);
-
+	
 
 	ScreenQuad.SetPixelOffset(&GBufferVar.ViewportDimensions);
-	DrawObject(&ScreenQuad,(TECHNIQUES)(ImGuiVar.Radio_Technique), (RENDERBUFFER)(ImGuiVar.Radio_BufferVisualization));
+	DrawObject(&ScreenQuad,(TECHNIQUES)2, (PASS)0);
 	
 
 	RenderImGui();
@@ -300,16 +323,16 @@ void RenderManager::RenderImGui()
 		ImGui::End();
 
 
-		if (RenderEnvMap)
-		{
-			StaticSphere.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource()->SetResource(StaticSphere.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView());
+		//if (RenderEnvMap)
+		//{
+		//	StaticSphere.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource()->SetResource(StaticSphere.GetMaterial()->GetTextures()["Skybox_beach.dds"]->GetShaderResourceView());
 
-		}
-		else
-		{
-			StaticSphere.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource()->SetResource(nullptr);
+		//}
+		//else
+		//{
+		//	StaticSphere.GetMaterial()->GetShaderVariables()["CubeSlot"]->AsShaderResource()->SetResource(nullptr);
 
-		}
+		//}
 
 	}
 

@@ -68,7 +68,6 @@ public:
 
 	bool CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, _Out_ RTTexture* RenderTarget, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc);
 	bool CreateDepthStencil(_Out_ ID3D11Texture2D** DepthStencil, _In_ D3D11_TEXTURE2D_DESC* DepthStencilDesc);
-
 	bool CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GbufferDescriptor);
 	bool CreateDepthStencilView(ID3D11DepthStencilView ** DepthStencilView, RTTexture* GBuffer, GBufferDescription* GBufferDesc);
 

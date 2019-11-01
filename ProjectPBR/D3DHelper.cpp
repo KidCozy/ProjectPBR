@@ -262,7 +262,7 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer,GBuff
 
 //	ReleaseGBuffer(GBuffer, *DepthStencilView);
 
-	for (UINT i = 0; i < (BUFFERCOUNT - 1); i++)
+	for (UINT i = 0; i < (BUFFERCOUNT - 2); i++)
 	{
 		if (FAILED(Device->CreateTexture2D(&GBufferDescription.RenderTargetDesc, 0, &GBuffer[i].Texture)))
 		{
@@ -280,12 +280,13 @@ void D3DHelper::Resize(ID3D11RenderTargetView** Merger, RTTexture* GBuffer,GBuff
 
 
 
+
 }
 
 bool D3DHelper::CreateRenderTarget(_In_ IDXGISwapChain* SwapChain, 
 	_Out_ RTTexture* Buffer, _In_ D3D11_TEXTURE2D_DESC* RenderTargetDesc)
 {
-	for (UINT i = 0; i < BUFFERCOUNT; i++)
+	for (UINT i = 0; i < BUFFERCOUNT-2; i++)
 	{
 		if (FAILED(Device->CreateTexture2D(RenderTargetDesc, 0, &Buffer[i].Texture)))
 		{
@@ -309,6 +310,7 @@ bool D3DHelper::CreateDepthStencil(_Out_ ID3D11Texture2D ** DepthStencil, _In_ D
 	return true;
 }
 
+
 bool D3DHelper::CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GBufferDescriptor)
 {
 
@@ -328,7 +330,7 @@ bool D3DHelper::CreateRenderTargetView(RTTexture* Buffer, GBufferDescription* GB
 
 	CreateRenderTarget(SwapChain, Buffer, RenderTargetDesc);
 
-	for (UINT i = 0; i < (BUFFERCOUNT-1); i++)
+	for (UINT i = 0; i < (BUFFERCOUNT-2); i++)
 	{
 		if (FAILED(Device->CreateRenderTargetView(Buffer[i].Texture, &GBufferDescriptor->RTVDesc, &Buffer[i].RTV)))
 		{
@@ -443,7 +445,6 @@ bool D3DHelper::AllocDebugLineBuffer(ID3D11Device * Device, Geometry * Geometry,
 		return false;
 	}
 
-	
 	return true;
 }
 bool D3DHelper::GenerateEffect(ID3D11Device * Device, Material* Resource)
