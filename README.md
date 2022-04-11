@@ -1,6 +1,4 @@
 # NOTICE
-![ ](https://i.imgur.com/vtNhLoD.png)
-
 This project is related with 3D graphics api such as DirectX. Researching and developing physically based rendering via **C++, HLSL**. 
 
 To-do
